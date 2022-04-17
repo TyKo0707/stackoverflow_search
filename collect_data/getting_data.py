@@ -18,7 +18,7 @@ query = """
     SELECT q.id, q.title, q.body, q.tags, a.body as answers, a.score
     FROM `bigquery-public-data.stackoverflow.posts_questions`
     AS q INNER JOIN `bigquery-public-data.stackoverflow.posts_answers`
-    AS a ON q.id = a.parent_id LIMIT 1000000
+    AS a ON q.id = a.parent_id LIMIT 1000
     """
 
 dataframe = (
