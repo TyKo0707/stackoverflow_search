@@ -15,5 +15,4 @@ dataframe = (
     .result()
     .to_dataframe()
 )
-print(dataframe.head())
 dataframe.to_csv("out.csv", index=False)
