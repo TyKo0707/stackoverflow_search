@@ -3,13 +3,13 @@ import pandas as pd
 chunk = pd.read_csv('../collect_data/out.csv', chunksize=1000)
 df = pd.concat(chunk)
 
-# Check if in dataframe are NaN values
+# Check if dataframe contains NaN values
 print(df.isna().sum())
 
 # Drop NaN values
 df = df.dropna(axis=0)
 
-# Check if in dataframe are duplicated values
+# Check if dataframe contains duplicated values
 print(df.duplicated().any())
 
 combination = {
