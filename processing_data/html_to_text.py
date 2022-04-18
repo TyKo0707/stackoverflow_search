@@ -2,7 +2,6 @@ import pandas as pd
 from tqdm import tqdm
 from bs4 import BeautifulSoup
 from textblob import TextBlob
-from preprocess_data import de_duplicated_data
 
 title_list = []
 content_list = []
