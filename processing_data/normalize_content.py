@@ -1,8 +1,8 @@
 import spacy
 import heapq
-from html_to_text import content_to_tokens
-from preprocess_data import de_duplicated_data
-from normalize_functions import preprocess_text
+from processing_data.html_to_text import content_to_tokens
+from processing_data.preprocess_data import de_duplicated_data
+from processing_data.normalize_functions import preprocess_text
 
 EN = spacy.load('en_core_web_sm')
 

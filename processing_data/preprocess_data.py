@@ -1,6 +1,7 @@
 import pandas as pd
+import sys
 
-chunk = pd.read_csv('../collect_data/out.csv', chunksize=1000)
+chunk = pd.read_csv(f'{sys.path[1]}/collect_data/out.csv', chunksize=1000)
 df = pd.concat(chunk)
 
 # Check if dataframe contains NaN values
