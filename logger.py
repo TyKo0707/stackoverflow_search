@@ -29,6 +29,3 @@ def get_logger(handle_info=True, handle_errors=True) -> logging.Logger:
         logger.addHandler(file_error_handler)
     logging.basicConfig(format=format_str, level=logging.INFO)
     return logger
-
-
-logger = get_logger()

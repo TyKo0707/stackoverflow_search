@@ -2,7 +2,9 @@ from google.cloud import bigquery
 import os
 from environs import Env
 import gdown
-from logger import logger
+from logger import get_logger
+
+logger = get_logger()
 
 env = Env()
 env.read_env()
