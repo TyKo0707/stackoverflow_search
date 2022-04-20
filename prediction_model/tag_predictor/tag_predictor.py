@@ -1,12 +1,16 @@
 import pandas as pd
 import spacy
 import warnings
+from environs import Env
+
+env = Env()
+env.read_env()
+HOME_DIRECTORY = env.str("HOME_DIRECTORY")
 
 EN = spacy.load('en_core_web_sm')
 warnings.filterwarnings('ignore')
 
-preprocessed_data = pd.read_csv('../../final_data.csv')
-print(preprocessed_data.shape)
+preprocessed_data = pd.read_csv(HOME_DIRECTORY + '\\final_data.csv')
 preprocessed_data.head()
 
 preprocessed_data.tags = preprocessed_data.tags.apply(lambda x: x.split('|'))  # Making the list of tags
@@ -22,7 +26,6 @@ for tags in preprocessed_data.tags:
 tags_to_use = 50
 tag_freq_dict_sorted = dict(sorted(tag_freq_dict.items(), key=lambda x: x[1], reverse=True))
 final_tags = list(tag_freq_dict_sorted.keys())[:tags_to_use]
-len(final_tags)
 
 # Change tag data to only for final_tags
 final_tag_data = []
