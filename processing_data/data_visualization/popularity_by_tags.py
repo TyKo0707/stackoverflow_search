@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from processing_data.preprocess_data import tag_freq_dict
+from processing_data.normalize_content import tag_freq_dict
 
 sorted_tags = sorted(tag_freq_dict.items(), key=lambda x: x[1], reverse=True)[:25]
 x = []
