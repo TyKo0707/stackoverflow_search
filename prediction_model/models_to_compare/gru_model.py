@@ -10,6 +10,9 @@ from time import time
 from datetime import datetime
 import numpy as np
 from prediction_model.prepare_data import embedding_matrix, vocab_size
+from logger import get_logger
+
+logger = get_logger()
 
 EN = spacy.load('en_core_web_sm')
 
@@ -43,13 +46,13 @@ METRICS = [
       tfa.metrics.FBetaScore(num_classes=2, average="micro", threshold=0.9)
 ]
 
-print("Runing the model compilation")
+logger.info("Running the model compilation")
 model.compile(loss='binary_crossentropy',
               metrics=METRICS,
               optimizer="adam")
 model.summary()
 
-print("End of compilation")
+logger.info("End of compilation")
 
 # Train Model
 folder_name = 'logs/model_tag_new_gru' + datetime.now().strftime("%Y%m%d-%H%M%S")
