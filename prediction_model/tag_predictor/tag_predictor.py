@@ -5,12 +5,12 @@ from environs import Env
 
 env = Env()
 env.read_env()
-HOME_DIRECTORY = env.str("HOME_DIRECTORY")
+FINAL_DATA = env.str("FINAL_DATA")
 
 EN = spacy.load('en_core_web_sm')
 warnings.filterwarnings('ignore')
 
-preprocessed_data = pd.read_csv(HOME_DIRECTORY + '\\final_data.csv')
+preprocessed_data = pd.read_csv(FINAL_DATA)
 preprocessed_data.head()
 
 preprocessed_data.tags = preprocessed_data.tags.apply(lambda x: x.split('|'))  # Making the list of tags

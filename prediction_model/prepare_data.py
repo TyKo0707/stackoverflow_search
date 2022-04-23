@@ -7,10 +7,14 @@ from gensim.models import Word2Vec
 from environs import Env
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
+from logger import get_logger
+
+logger = get_logger(handle_errors=False)
 
 env = Env()
 env.read_env()
-HOME_DIRECTORY = env.str("HOME_DIRECTORY")
+TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
+W2V_MODEL_PATH = env.str("W2V_MODEL_PATH")
 
 W2V_SIZE = 300
 MAX_SEQUENCE_LENGTH = 300
@@ -22,7 +26,7 @@ tags_encoded = tag_encoder.fit_transform(final_tag_data)
 data = pd.DataFrame(columns=['corpus_code_combined'])
 data["corpus_code_combined"] = preprocessed_data.post_corpus
 
-w2v_model = Word2Vec.load(HOME_DIRECTORY + "/models/SO_word2vec_embeddings.bin")
+w2v_model = Word2Vec.load(W2V_MODEL_PATH)
 
 # Split into train and test set
 X_train, X_test, y_train, y_test = train_test_split(np.array(data.corpus_code_combined),
@@ -35,7 +39,7 @@ tokenizer.fit_on_texts(preprocessed_data.post_corpus)
 
 word_index = tokenizer.word_index
 vocab_size = len(word_index)
-print('Found %s unique tokens.' % len(word_index))
+print(f'Found {len(word_index)} unique tokens.')
 
 # Convert the data to padded sequences
 X_train_padded = tokenizer.texts_to_sequences(X_train)
@@ -53,10 +57,11 @@ for word, i in tokenizer.word_index.items():
         embedding_matrix[i] = w2v_model.wv[word]
 print(embedding_matrix.shape)
 
-path = HOME_DIRECTORY + '\\prediction_model\\train_test_datasets\\'
-np.save(path + 'x_train.npy', X_train)
-np.save(path + 'x_test.npy', X_test)
-np.save(path + 'y_train.npy', y_train)
-np.save(path + 'y_test.npy', y_test)
-np.save(path + 'x_train_padded.npy', X_train_padded)
-np.save(path + 'x_test_padded.npy', X_test_padded)
+np.save(TRAIN_TEST_PATH + 'x_train.npy', X_train)
+np.save(TRAIN_TEST_PATH + 'x_test.npy', X_test)
+np.save(TRAIN_TEST_PATH + 'y_train.npy', y_train)
+np.save(TRAIN_TEST_PATH + 'y_test.npy', y_test)
+np.save(TRAIN_TEST_PATH + 'x_train_padded.npy', X_train_padded)
+np.save(TRAIN_TEST_PATH + 'x_test_padded.npy', X_test_padded)
+
+logger.info("All datasets were saved")
