@@ -24,10 +24,11 @@ query = """
     AS q INNER JOIN `bigquery-public-data.stackoverflow.posts_answers`
     AS a ON q.id = a.parent_id LIMIT """ + DATE_SIZE
 
-dataframe = (
-    client.query(query)
-        .result()
-        .to_dataframe()
-)
-dataframe.to_csv("out.csv", index=False)
-logger.info(f"Data ({DATE_SIZE} items) was successfully downloaded and converted to CSV-file")
+try:
+    dataframe = (
+        client.query(query).result().to_dataframe()
+    )
+    dataframe.to_csv("out.csv", index=False)
+    logger.info(f"Data ({DATE_SIZE} items) was successfully downloaded and converted to CSV-file")
+except Exception as ex:
+    logger.exception("An error occurred while pulling data from the database")
