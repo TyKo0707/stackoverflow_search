@@ -23,7 +23,7 @@ for tags in preprocessed_data.tags:
             tag_freq_dict[tag] += 1
 
 # Get most common tags
-tags_to_use = 50
+tags_to_use = 1000
 tag_freq_dict_sorted = dict(sorted(tag_freq_dict.items(), key=lambda x: x[1], reverse=True))
 final_tags = list(tag_freq_dict_sorted.keys())[:tags_to_use]
 
