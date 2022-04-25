@@ -11,7 +11,6 @@ EN = spacy.load('en_core_web_sm')
 warnings.filterwarnings('ignore')
 
 preprocessed_data = pd.read_csv(FINAL_DATA)
-preprocessed_data.head()
 
 preprocessed_data.tags = preprocessed_data.tags.apply(lambda x: x.split('|'))  # Making the list of tags
 tag_freq_dict = {}

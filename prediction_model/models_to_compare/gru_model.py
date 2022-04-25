@@ -8,7 +8,6 @@ from environs import Env
 from time import time
 from datetime import datetime
 import numpy as np
-from prediction_model.prepare_data import embedding_matrix, vocab_size
 from logger import get_logger
 import keras.backend as K
 
@@ -30,6 +29,7 @@ EN = spacy.load('en_core_web_sm')
 env = Env()
 env.read_env()
 TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
+VOCAB_SIZE = env.int("VOCAB_SIZE")
 
 W2V_SIZE = 300
 MAX_SEQUENCE_LENGTH = 300
@@ -39,6 +39,7 @@ X_train_padded = np.load(TRAIN_TEST_PATH + 'x_train_padded.npy', allow_pickle=Tr
 y_train = np.load(TRAIN_TEST_PATH + 'y_train.npy', allow_pickle=True)
 X_test_padded = np.load(TRAIN_TEST_PATH + 'x_test_padded.npy', allow_pickle=True)
 y_test = np.load(TRAIN_TEST_PATH + 'y_test.npy', allow_pickle=True)
+embedding_matrix = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npy', allow_pickle=True)
 
 result_metrics = [
     BinaryAccuracy(name='accuracy'),
@@ -49,7 +50,7 @@ result_metrics = [
 
 model = Sequential()
 model.add(
-    Embedding(vocab_size + 1, W2V_SIZE, weights=[embedding_matrix], input_length=MAX_SEQUENCE_LENGTH, trainable=False))
+    Embedding(VOCAB_SIZE + 1, W2V_SIZE, weights=[embedding_matrix], input_length=MAX_SEQUENCE_LENGTH, trainable=False))
 model.add(GRU(300, activation='relu', kernel_initializer='he_normal'))
 model.add(Dense(400, activation='relu', kernel_initializer="he_normal"))
 model.add(Dropout(0.5))
