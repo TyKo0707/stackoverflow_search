@@ -65,10 +65,6 @@ model.summary()
 
 
 # Train Model
-folder_name = 'logs/model_tag_new_gru' + datetime.now().strftime("%Y%m%d-%H%M%S")
-tensorboard = TensorBoard(log_dir=folder_name.format(time()), histogram_freq=1, write_grads=True, batch_size=1024)
-callbacks = [ReduceLROnPlateau(monitor='val_categorical_accuracy', patience=5, cooldown=0),
-             EarlyStopping(monitor='val_categorical_accuracy', min_delta=1e-4, patience=5), tensorboard]
 
 BATCH_SIZE = 1024
 logger.info("Start fitting model")
@@ -76,7 +72,12 @@ history = model.fit(x=X_train_padded, y=y_train,
                     batch_size=BATCH_SIZE,
                     epochs=20,
                     validation_split=0.1,
-                    verbose=1,
-                    callbacks=callbacks)
+                    verbose=2)
 
 logger.info("End of fitting model")
+
+model.save_weights("stack.h5")
+model_json = model.to_json()
+json_file = open("stack.json", "w")
+json_file.write(model_json)
+json_file.close()
