@@ -8,8 +8,6 @@ import keras
 from keras.models import load_model
 from sklearn.metrics.pairwise import cosine_similarity
 from keras.preprocessing.sequence import pad_sequences
-# from keras.preprocessing.text import Tokenizer
-# from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 import pickle
@@ -23,6 +21,7 @@ env = Env()
 env.read_env()
 FINAL_DATA = env.str("FINAL_DATA")
 MODELS = env.str("MODELS")
+MAX_SEQUENCE_LENGTH = 300
 TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
 nltk.download('stopwords')
 
@@ -66,14 +65,11 @@ def predict_tags(text):
 
 # Load model and other relevant stuff
 tag_encoder = load_tag_encoder()
-print("loded the tag encoder")
-MAX_SEQUENCE_LENGTH = 300
 
 with open(TRAIN_TEST_PATH + 'tokenizer', 'rb') as tokenizer_file:
     tokenizer = pickle.load(tokenizer_file)
 
 keras.losses.multitask_loss = multitask_loss
-global graph
 graph = tf.get_default_graph()
 model = load_model(MODELS + "stack.h5", custom_objects={'f1': f1_score, 'recall': recall_score,
                                                         'precision': precision_score})
@@ -105,7 +101,7 @@ def search_results(search_string, num_results):
     # Getting the predicted tags
     tags = list(predict_tags(search_string))
     tags = [item for t in tags for item in t]
-    search_results = []
+    search_res = []
     if len(tags) != 0:
         mask = preprocessed_data['tags'].isin(tags)
         data_new = preprocessed_data[mask]
@@ -130,7 +126,7 @@ def search_results(search_string, num_results):
 
         # adding addtional scores like overall score, sentiment, search string tfidf to the cosine similarity
         cosine_similarities = cosine_similarities.add(
-            0.4 * data_new.overall_scores + 0.1 * (data_new.sentiment_polarity) + 0.1 * (masked_vectorizer.idf_),
+            (0.4 * data_new.overall_scores) + (0.1 * data_new.sentiment_polarity) + (0.1 * masked_vectorizer.idf_),
             fill_value=0)
 
         for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
@@ -148,20 +144,20 @@ def search_results(search_string, num_results):
                 'body': str(output),
                 'tags': tags
             }
-            search_results.append(temp)
-        return search_results
+            search_res.append(temp)
+        return search_res
     else:
         input_query = [search_string]
         all_title_embeddings = title_embeddings
+
         # calculating the tfidf of the input search query
         search_string_tfidf = vectorizer.transform(input_query)
         cosine_similarities = pd.Series(cosine_similarity(search_vect, all_title_embeddings)[0])
-        # cosine_similarities = cosine_similarities.add(0.4*preprocessed_data.overall_scores + 0.1*(preprocessed_data.sentiment_polarity),fill_value=0)
         cosine_similarities = cosine_similarities.add(
-            0.4 * preprocessed_data.overall_scores + 0.1 * (preprocessed_data.sentiment_polarity) + 0.2 * (
-                vectorizer.idf_), fill_value=0)
-        # print("cosine similarity is calculated 2")
-        search_results = []
+            (0.4 * preprocessed_data.overall_scores) + (0.1 * preprocessed_data.sentiment_polarity) +
+            (0.2 * vectorizer.idf_), fill_value=0)
+
+        search_res = []
         for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
             output = ''
             for t in preprocessed_data.iloc[i].question_content.split():
@@ -177,5 +173,5 @@ def search_results(search_string, num_results):
                 'body': str(output),
                 'tags': tags
             }
-            search_results.append(temp)
-        return search_results
+            search_res.append(temp)
+        return search_res

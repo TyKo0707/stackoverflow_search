@@ -2,11 +2,8 @@ import spacy
 from keras.metrics import BinaryAccuracy, Precision, Recall
 from keras.models import Sequential
 from keras.layers import Dense, Embedding, Dropout, GRU
-from keras.callbacks import ReduceLROnPlateau, EarlyStopping, TensorBoard
 from keras.layers import BatchNormalization
 from environs import Env
-from time import time
-from datetime import datetime
 import numpy as np
 from logger import get_logger
 import keras.backend as K
