@@ -1,11 +1,13 @@
 import pandas as pd
 import spacy
 import warnings
+import pickle
 from environs import Env
 
 env = Env()
 env.read_env()
 FINAL_DATA = env.str("FINAL_DATA")
+TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
 
 EN = spacy.load('en_core_web_sm')
 warnings.filterwarnings('ignore')
@@ -34,3 +36,6 @@ for tags in preprocessed_data.tags:
         if tag in final_tags:
             temp.append(tag)
     final_tag_data.append(temp)
+
+with open(TRAIN_TEST_PATH + "final_tags.txt", "wb") as fp:  # Pickling
+    pickle.dump(final_tag_data, fp)

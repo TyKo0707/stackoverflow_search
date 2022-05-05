@@ -36,14 +36,13 @@ w2v_model = gensim.models.word2vec.Word2Vec.load(MODELS + 'SO_word2vec_embedding
 # Custom loss function to handle multilabel classification task
 def multitask_loss(y_true, y_pred):
     # Avoid divide by 0
-    y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())
+    y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())  # K.epsilon() = 1e-7
     # Multi-task loss
-    return K.mean(K.sum(- y_true * K.log(y_pred) - (1 - y_true) * K.log(1 - y_pred), axis=1))
+    return K.mean(K.sum(-y_true * K.log(y_pred) - (1 - y_true) * K.log(1 - y_pred), axis=1))
 
 
 def load_tag_encoder():
-    # Question 2
-    with open('../data/final_tag_data.pickle', 'rb') as final_tag:
+    with open(TRAIN_TEST_PATH + "final_tags.txt", "rb") as final_tag:  # Unpickling
         final_tag_data = pickle.load(final_tag)
     tag_encoder = MultiLabelBinarizer()
     tags_encoded = tag_encoder.fit_transform(final_tag_data)
@@ -100,6 +99,7 @@ def search_results(search_string, num_results):
     # preprocessing the input search string
     search_string = preprocess_text(search_string)
     search_vect = np.array([question_to_vec(search_string, w2v_model)])
+
     # Getting the predicted tags
     tags = list(predict_tags(search_string))
     tags = [item for t in tags for item in t]
