@@ -1,5 +1,6 @@
 import pandas as pd
-from sklearn.metrics import recall_score, precision_score, f1_score
+from keras.metrics import Precision, Recall
+import keras.losses
 import numpy as np
 from processing_data.normalize_functions import preprocess_text
 import gensim
@@ -32,6 +33,16 @@ title_embeddings = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npy')
 w2v_model = gensim.models.word2vec.Word2Vec.load(MODELS + 'SO_word2vec_embeddings.bin')
 
 
+def f1_metric(y_true, y_pred):
+    true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
+    possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
+    predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
+    precision = true_positives / (predicted_positives + K.epsilon())
+    recall = true_positives / (possible_positives + K.epsilon())
+    f1_val = 2 * (precision * recall) / (precision + recall + K.epsilon())
+    return f1_val
+
+
 # Custom loss function to handle multilabel classification task (modified cross entropy)
 def multitask_loss(y_true, y_pred):
     # Avoid divide by 0
@@ -43,9 +54,9 @@ def multitask_loss(y_true, y_pred):
 def load_tag_encoder():
     with open(TRAIN_TEST_PATH + "final_tags.txt", "rb") as final_tag:  # Unpickling
         final_tag_data = pickle.load(final_tag)
-    tag_encoder = MultiLabelBinarizer()
-    tag_encoder.fit_transform(final_tag_data)
-    return tag_encoder
+    tag_encode = MultiLabelBinarizer()
+    tag_encode.fit_transform(final_tag_data)
+    return tag_encode
 
 
 def predict_tags(text):
@@ -70,9 +81,8 @@ with open(TRAIN_TEST_PATH + 'tokenizer', 'rb') as tokenizer_file:
     tokenizer = pickle.load(tokenizer_file)
 
 keras.losses.multitask_loss = multitask_loss
-graph = tf.get_default_graph()
-model = load_model(MODELS + "stack.h5", custom_objects={'f1': f1_score, 'recall': recall_score,
-                                                        'precision': precision_score})
+graph = tf.compat.v1.get_default_graph()
+model = load_model(MODELS + "stack.h5", custom_objects={'f1': f1_metric, 'recall': Recall, 'precision': Precision})
 
 
 def question_to_vec(question, embeddings, dim=300):
@@ -90,10 +100,11 @@ def question_to_vec(question, embeddings, dim=300):
 
 # calculating the tfidf of the all the title
 vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=preprocessed_data.shape[0])
-All_title_tfidf = vectorizer.fit_transform(preprocessed_data['processed_title'].values)
+vectorizer.fit_transform(preprocessed_data['processed_title'].values)
 
 
 def search_results(search_string, num_results):
+
     # preprocessing the input search string
     search_string = preprocess_text(search_string)
     search_vect = np.array([question_to_vec(search_string, w2v_model)])
@@ -102,6 +113,7 @@ def search_results(search_string, num_results):
     tags = list(predict_tags(search_string))
     tags = [item for t in tags for item in t]
     search_res = []
+
     if len(tags) != 0:
         mask = preprocessed_data['tags'].isin(tags)
         data_new = preprocessed_data[mask]
@@ -146,6 +158,7 @@ def search_results(search_string, num_results):
             }
             search_res.append(temp)
         return search_res
+
     else:
         input_query = [search_string]
         all_title_embeddings = title_embeddings
