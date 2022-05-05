@@ -2,6 +2,7 @@ from environs import Env
 from logger import get_logger
 import pandas as pd
 from keras.preprocessing.text import Tokenizer
+import pickle
 
 logger = get_logger(handle_errors=False)
 
@@ -19,6 +20,9 @@ preprocessed_data = pd.read_csv(FINAL_DATA)
 
 tokenizer = Tokenizer()
 tokenizer.fit_on_texts(preprocessed_data.post_corpus)
+
+with open(TRAIN_TEST_PATH + "tokenizer.txt", 'wb') as tokenizer_file:
+    pickle.dump(tokenizer, tokenizer_file)
 
 word_index = tokenizer.word_index
 vocab_size = len(word_index)

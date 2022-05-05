@@ -33,7 +33,7 @@ title_embeddings = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npy')
 w2v_model = gensim.models.word2vec.Word2Vec.load(MODELS + 'SO_word2vec_embeddings.bin')
 
 
-# Custom loss function to handle multilabel classification task
+# Custom loss function to handle multilabel classification task (modified cross entropy)
 def multitask_loss(y_true, y_pred):
     # Avoid divide by 0
     y_pred = K.clip(y_pred, K.epsilon(), 1 - K.epsilon())  # K.epsilon() = 1e-7
@@ -45,7 +45,7 @@ def load_tag_encoder():
     with open(TRAIN_TEST_PATH + "final_tags.txt", "rb") as final_tag:  # Unpickling
         final_tag_data = pickle.load(final_tag)
     tag_encoder = MultiLabelBinarizer()
-    tags_encoded = tag_encoder.fit_transform(final_tag_data)
+    tag_encoder.fit_transform(final_tag_data)
     return tag_encoder
 
 
@@ -68,8 +68,10 @@ def predict_tags(text):
 tag_encoder = load_tag_encoder()
 print("loded the tag encoder")
 MAX_SEQUENCE_LENGTH = 300
-with open('../models/tokenizer.pickle', 'rb') as handle:
-    tokenizer = pickle.load(handle)
+
+with open(TRAIN_TEST_PATH + 'tokenizer', 'rb') as tokenizer_file:
+    tokenizer = pickle.load(tokenizer_file)
+
 keras.losses.multitask_loss = multitask_loss
 global graph
 graph = tf.get_default_graph()
