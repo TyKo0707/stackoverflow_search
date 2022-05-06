@@ -112,9 +112,10 @@ def search_results(search_string, num_results):
     # Getting the predicted tags
     tags = list(predict_tags(search_string))
     tags = [item for t in tags for item in t]
-    search_res = []
 
     if len(tags) != 0:
+        search_res = []
+
         mask = preprocessed_data['tags'].isin(tags)
         data_new = preprocessed_data[mask]
         data_new.reset_index(inplace=True, drop=True)
