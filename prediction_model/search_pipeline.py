@@ -6,7 +6,7 @@ from processing_data.normalize_functions import preprocess_text
 import gensim
 import tensorflow as tf
 import keras
-from keras.models import load_model
+from keras.models import load_model, model_from_json
 from sklearn.metrics.pairwise import cosine_similarity
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -77,12 +77,17 @@ def predict_tags(text):
 # Load model and other relevant stuff
 tag_encoder = load_tag_encoder()
 
-with open(TRAIN_TEST_PATH + 'tokenizer', 'rb') as tokenizer_file:
+with open(TRAIN_TEST_PATH + 'tokenizer.txt', 'rb') as tokenizer_file:
     tokenizer = pickle.load(tokenizer_file)
 
 keras.losses.multitask_loss = multitask_loss
 graph = tf.compat.v1.get_default_graph()
-model = load_model(MODELS + "stack.h5", custom_objects={'f1': f1_metric, 'recall': Recall, 'precision': Precision})
+with open(MODELS + 'stack.json', 'r') as json_file:
+    loaded_model_json = json_file.read()
+    model = model_from_json(loaded_model_json,
+                            custom_objects={'f1': f1_metric, 'recall': Recall, 'precision': Precision})
+# load weights into new model
+model.load_weights(MODELS + "stack.h5")
 
 
 def question_to_vec(question, embeddings, dim=300):
@@ -137,7 +142,7 @@ def search_results(search_string, num_results):
         # calculating the cosine similarity
         cosine_similarities = pd.Series(cosine_similarity(search_vect, all_title_embeddings)[0])
 
-        # adding addtional scores like overall score, sentiment, search string tfidf to the cosine similarity
+        # adding additional scores like overall score, sentiment, search string tfidf to the cosine similarity
         cosine_similarities = cosine_similarities.add(
             (0.4 * data_new.overall_scores) + (0.1 * data_new.sentiment_polarity) + (0.1 * masked_vectorizer.idf_),
             fill_value=0)
@@ -189,3 +194,7 @@ def search_results(search_string, num_results):
             }
             search_res.append(temp)
         return search_res
+
+
+if __name__ == '__main__':
+    search_results("Copy constructor in C++", 2)
