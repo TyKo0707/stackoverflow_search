@@ -63,8 +63,7 @@ def predict_tags(text):
     # Tokenize text
     x_test = pad_sequences(tokenizer.texts_to_sequences([text]), maxlen=MAX_SEQUENCE_LENGTH)
     # Predict
-    with graph.as_default():
-        prediction = model.predict([x_test])[0]
+    prediction = model.predict([x_test])[0]
     for i, value in enumerate(prediction):
         if value > 0.5:
             prediction[i] = 1
@@ -94,9 +93,10 @@ def question_to_vec(question, embeddings, dim=300):
     question_embedding = np.zeros(dim)
     valid_words = 0
     for word in question.split(' '):
-        if word in embeddings:
+        if word in embeddings.wv.index_to_key:
             valid_words += 1
-            question_embedding += embeddings[word]
+            huy = embeddings.syn1neg[embeddings.wv.key_to_index[word]]
+            question_embedding += embeddings.syn1neg[embeddings.wv.key_to_index[word]]
     if valid_words > 0:
         return question_embedding / valid_words
     else:
@@ -120,7 +120,6 @@ def search_results(search_string, num_results):
 
     if len(tags) != 0:
         search_res = []
-
         mask = preprocessed_data['tags'].isin(tags)
         data_new = preprocessed_data[mask]
         data_new.reset_index(inplace=True, drop=True)
@@ -197,4 +196,4 @@ def search_results(search_string, num_results):
 
 
 if __name__ == '__main__':
-    search_results("Copy constructor in C++", 2)
+    search_results("Python decorators", 2)
