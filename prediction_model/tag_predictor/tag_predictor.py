@@ -37,5 +37,5 @@ for tags in preprocessed_data.tags:
             temp.append(tag)
     final_tag_data.append(temp)
 
-with open(TRAIN_TEST_PATH + "final_tags.txt", "wb") as fp:  # Pickling
+with open(TRAIN_TEST_PATH + "tokenizer.txt", "wb") as fp:  # Pickling
     pickle.dump(final_tag_data, fp)
