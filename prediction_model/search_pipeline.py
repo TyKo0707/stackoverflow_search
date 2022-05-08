@@ -52,7 +52,7 @@ def multitask_loss(y_true, y_pred):
 
 
 def load_tag_encoder():
-    with open(TRAIN_TEST_PATH + "final_tags.txt", "rb") as final_tag:  # Unpickling
+    with open(TRAIN_TEST_PATH + "tokenizer.txt", "rb") as final_tag:  # Unpickling
         final_tag_data = pickle.load(final_tag)
     tag_encode = MultiLabelBinarizer()
     tag_encode.fit_transform(final_tag_data)
