@@ -6,7 +6,7 @@ from processing_data.normalize_functions import preprocess_text
 import gensim
 import tensorflow as tf
 import keras
-from keras.models import load_model, model_from_json
+from keras.models import model_from_json
 from sklearn.metrics.pairwise import cosine_similarity
 from keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import TfidfVectorizer

@@ -1,9 +1,9 @@
 from aiogram.dispatcher import FSMContext
-from states.state_storage import States
-from loader import dp
+from bot_tg.states.state_storage import States
+from bot_tg.loader import dp
 from aiogram.types import Message
-from utils.misc.logging import get_logger
-from keyboards import main_keyboard
+from bot_tg.utils.misc.logging import get_logger
+from bot_tg.keyboards import main_keyboard
 import aiogram.utils.markdown as fmt
 
 logger = get_logger()
