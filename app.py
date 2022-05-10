@@ -1,7 +1,7 @@
 from aiogram import executor
 from bot_tg.loader import dp, bot
 from bot_tg.utils.set_bot_commands import set_default_commands
-from bot_tg.utils.misc.logging import get_logger
+from logger import get_logger
 from bot_tg.data.config import WEBHOOK_URL, WEBHOOK_PATH, WEBAPP_HOST, WEBAPP_PORT
 
 logger = get_logger()
