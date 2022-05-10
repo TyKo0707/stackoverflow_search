@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     from sklearn.preprocessing import MultiLabelBinarizer
     import numpy as np
-    from prediction_model.tag_predictor.tag_predictor import final_tag_data
+    from search_engine.prediction_model.tag_predictor.tag_predictor import final_tag_data
     from sklearn.model_selection import train_test_split
     from gensim.models import Word2Vec
     from keras.preprocessing.sequence import pad_sequences

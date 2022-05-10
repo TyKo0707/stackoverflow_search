@@ -96,7 +96,6 @@ def question_to_vec(question, embeddings, dim=300):
     for word in question.split(' '):
         if word in embeddings.wv.index_to_key:
             valid_words += 1
-            huy = embeddings.syn1neg[embeddings.wv.key_to_index[word]]
             question_embedding += embeddings.syn1neg[embeddings.wv.key_to_index[word]]
     if valid_words > 0:
         return question_embedding / valid_words
@@ -118,12 +117,10 @@ def search_results(search_string, num_results):
     # Getting the predicted tags
     tags = list(predict_tags(search_string))
     tags = [item for t in tags for item in t]
-    tags = {'linux', 'apache', 'virtualhost'}
+    tags = set(tags)
 
     if len(tags) != 0:
         search_res = []
-        huy = preprocessed_data.tags
-        pizda = preprocessed_data.iloc[0].tags
         mask = [True if len(tags.intersection(set(preprocessed_data.iloc[i].tags))) >= 2 else False
                 for i in range(preprocessed_data.shape[0])]
         data_new = preprocessed_data[mask]
@@ -201,5 +198,4 @@ def search_results(search_string, num_results):
 
 
 if __name__ == '__main__':
-    search_results("error_log per virtual host one linux server running apache "
-                   "php 5 multiple virtual hosts separate log files seem separate php virtual hosts", 2)
+    print(search_results('c++ public class', 2))
