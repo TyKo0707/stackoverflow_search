@@ -1,5 +1,5 @@
 import gensim
-from prediction_model.tag_predictor.tag_predictor import preprocessed_data
+from search_engine.prediction_model.tag_predictor.tag_predictor import preprocessed_data
 from environs import Env
 import numpy as np
 from pathlib import Path

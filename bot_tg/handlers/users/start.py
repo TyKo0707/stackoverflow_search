@@ -2,7 +2,7 @@ from aiogram.dispatcher import FSMContext
 from bot_tg.states.state_storage import States
 from bot_tg.loader import dp
 from aiogram.types import Message
-from bot_tg.utils.misc.logging import get_logger
+from logger import get_logger
 from bot_tg.keyboards import main_keyboard
 import aiogram.utils.markdown as fmt
 

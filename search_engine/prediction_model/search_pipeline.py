@@ -2,7 +2,7 @@ import pandas as pd
 from keras.metrics import Precision, Recall
 import keras.losses
 import numpy as np
-from processing_data.normalize_functions import preprocess_text
+from search_engine.processing_data.normalize_functions import preprocess_text
 import gensim
 import tensorflow as tf
 import keras
