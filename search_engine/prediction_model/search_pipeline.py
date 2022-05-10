@@ -27,6 +27,7 @@ TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
 nltk.download('stopwords')
 
 preprocessed_data = pd.read_csv(FINAL_DATA)
+preprocessed_data.tags = preprocessed_data.tags.apply(lambda x: x.split('|'))
 title_embeddings = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npy')
 
 # Import saved Word2vec Embeddings
@@ -52,7 +53,7 @@ def multitask_loss(y_true, y_pred):
 
 
 def load_tag_encoder():
-    with open(TRAIN_TEST_PATH + "tokenizer.txt", "rb") as final_tag:  # Unpickling
+    with open(TRAIN_TEST_PATH + "final_tags.txt", "rb") as final_tag:  # Unpickling
         final_tag_data = pickle.load(final_tag)
     tag_encode = MultiLabelBinarizer()
     tag_encode.fit_transform(final_tag_data)
@@ -117,10 +118,14 @@ def search_results(search_string, num_results):
     # Getting the predicted tags
     tags = list(predict_tags(search_string))
     tags = [item for t in tags for item in t]
+    tags = {'linux', 'apache', 'virtualhost'}
 
     if len(tags) != 0:
         search_res = []
-        mask = preprocessed_data['tags'].isin(tags)
+        huy = preprocessed_data.tags
+        pizda = preprocessed_data.iloc[0].tags
+        mask = [True if len(tags.intersection(set(preprocessed_data.iloc[i].tags))) >= 2 else False
+                for i in range(preprocessed_data.shape[0])]
         data_new = preprocessed_data[mask]
         data_new.reset_index(inplace=True, drop=True)
         all_title_embeddings = []
@@ -196,4 +201,5 @@ def search_results(search_string, num_results):
 
 
 if __name__ == '__main__':
-    search_results("Python decorators", 2)
+    search_results("error_log per virtual host one linux server running apache "
+                   "php 5 multiple virtual hosts separate log files seem separate php virtual hosts", 2)
