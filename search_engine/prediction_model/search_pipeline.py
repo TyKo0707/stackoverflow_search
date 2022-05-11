@@ -121,7 +121,7 @@ def search_results(search_string, num_results):
 
     if len(tags) != 0:
         search_res = []
-        mask = [True if len(tags.intersection(set(preprocessed_data.iloc[i].tags))) >= 2 else False
+        mask = [True if len(tags.intersection(set(preprocessed_data.iloc[i].tags))) >= 1 else False
                 for i in range(preprocessed_data.shape[0])]
         data_new = preprocessed_data[mask]
         data_new.reset_index(inplace=True, drop=True)
@@ -198,4 +198,4 @@ def search_results(search_string, num_results):
 
 
 if __name__ == '__main__':
-    print(search_results('c++ public class', 2))
+    print(search_results('deploy python telegram bot', 2))
