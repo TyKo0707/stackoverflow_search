@@ -5,7 +5,6 @@ import numpy as np
 from search_engine.processing_data.normalize_functions import preprocess_text
 import gensim
 import tensorflow as tf
-import keras
 from keras.models import model_from_json
 from sklearn.metrics.pairwise import cosine_similarity
 from keras.preprocessing.sequence import pad_sequences
@@ -56,8 +55,8 @@ def load_tag_encoder():
     with open(TRAIN_TEST_PATH + "final_tags.txt", "rb") as final_tag:  # Unpickling
         final_tag_data = pickle.load(final_tag)
     tag_encode = MultiLabelBinarizer()
-    tag_encode.fit_transform(final_tag_data)
-    return tag_encode
+    tags_encoded = tag_encode.fit_transform(final_tag_data)
+    return tags_encoded
 
 
 def predict_tags(text):
@@ -77,7 +76,7 @@ def predict_tags(text):
 # Load model and other relevant stuff
 tag_encoder = load_tag_encoder()
 
-with open(TRAIN_TEST_PATH + 'tokenizer.txt', 'rb') as tokenizer_file:
+with open(TRAIN_TEST_PATH + "final_tags.txt", 'rb') as tokenizer_file:
     tokenizer = pickle.load(tokenizer_file)
 
 keras.losses.multitask_loss = multitask_loss
@@ -109,7 +108,6 @@ vectorizer.fit_transform(preprocessed_data['processed_title'].values)
 
 
 def search_results(search_string, num_results):
-
     # preprocessing the input search string
     search_string = preprocess_text(search_string)
     search_vect = np.array([question_to_vec(search_string, w2v_model)])

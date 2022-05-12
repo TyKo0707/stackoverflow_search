@@ -1,5 +1,4 @@
 import logging
-import sys
 from environs import Env
 
 env = Env()
@@ -9,6 +8,7 @@ ROOT = env.str("ROOT_PATH")
 
 class LevelFilter(logging.Filter):
     def __init__(self, level):
+        super().__init__()
         self.__level = level
 
     def filter(self, record: logging.LogRecord) -> bool:
