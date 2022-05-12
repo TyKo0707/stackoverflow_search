@@ -1,6 +1,6 @@
 from bot_tg.loader import dp
 from bot_tg.states.state_storage import States
-from aiogram.types import Message
+from aiogram.types import Message, ChatType
 from bot_tg.data.config import MAX_LIMIT
 from aiogram.utils.markdown import hlink
 import aiogram.utils.markdown as fmt
@@ -8,7 +8,8 @@ from aiogram.dispatcher.filters import Text
 import random
 
 
-@dp.message_handler(Text(equals='Search🔎'), state=[States.start, None])
+@dp.message_handler(Text(equals='Search🔎'), state=[States.start, None], chat_type=ChatType.PRIVATE)
+@dp.message_handler(commands="search", state=[States.start, None])
 async def enter_search_mode(message: Message):
     await States.input_text.set()
     await message.reply(fmt.text(f"Enter the {fmt.hbold('request')} to be searched for:"))
