@@ -31,18 +31,18 @@ async def input_limit(message: Message):
     global TEXT
     if text.isdecimal() and 0 < int(text) <= MAX_LIMIT:
         articles = search_results(TEXT, int(text))
-        print(articles)
-        # articles = "Articles:\n"
-        # for i in range(int(text)):
-        #     articles += fmt.text(
-        #         fmt.text(f'{fmt.hbold("Title:")} {hlink(f"Article {i + 1}", "https://stackoverflow.com")}'),
-        #         fmt.text(f'\t\t\t{fmt.hbold("Similarity score:")} {round(random.uniform(1, 1.5), 5)}'),
-        #         fmt.text(f'\t\t\t{fmt.hbold("Tags:")} example | search | stackoverflow'),
-        #         fmt.text(f'\t\t\t{fmt.hbold("Body:")} {TEXT}\n'),
-        #         sep='\n'
-        #     )
-        # await message.reply(articles, disable_web_page_preview=True)
-        # await States.start.set()
+
+        result = "Articles:\n—————————"
+        for i in range(5):
+            result += fmt.text(
+                fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
+                fmt.text(f'{fmt.hbold("Similarity score:")} {articles[i]["similarity_score"]}'),
+                fmt.text(f'{fmt.hbold("Tags:")} {articles[i]["tags"]}'),
+                fmt.text(f'{fmt.hbold("Body:")} {articles[i]["body"][:75]}...\n—————————\n'),
+                sep='\n'
+            )
+        await message.reply(result, disable_web_page_preview=True)
+        await States.start.set()
     else:
         await message.reply(fmt.text(f"{fmt.hbold('Incorrect input')}. "
                                      f"Only non-negative integers are allowed which are \u2264 {MAX_LIMIT}."
