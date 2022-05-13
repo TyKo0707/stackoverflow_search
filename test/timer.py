@@ -3,7 +3,7 @@ import time
 
 
 @contextmanager
-def timer(name):
+def timer(name, na_sep):
     t0 = time.time()
     yield
-    print(f'[{name}] done in {time.time() - t0:.0f} s')
+    print(f'[{name}] done in {round((time.time() - t0), na_sep)} s')
