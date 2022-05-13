@@ -25,7 +25,7 @@ MAX_SEQUENCE_LENGTH = 300
 TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
 nltk.download('stopwords')
 
-preprocessed_data = pd.read_csv(FINAL_DATA)
+preprocessed_data = pd.read_csv(FINAL_DATA, engine="pyarrow")
 preprocessed_data.tags = preprocessed_data.tags.apply(lambda x: x.split('|'))
 title_embeddings = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npy')
 
