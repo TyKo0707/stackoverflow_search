@@ -56,7 +56,7 @@ def load_tag_encoder():
         final_tag_data = pickle.load(final_tag)
     tag_encode = MultiLabelBinarizer()
     tags_encoded = tag_encode.fit_transform(final_tag_data)
-    return tags_encoded
+    return tag_encode
 
 
 def predict_tags(text):
@@ -69,14 +69,14 @@ def predict_tags(text):
             prediction[i] = 1
         else:
             prediction[i] = 0
-    tags = tag_encoder.inverse_transform(np.array([prediction]))
+    tags = tag_encoder.inverse_transform(prediction)
     return tags
 
 
 # Load model and other relevant stuff
 tag_encoder = load_tag_encoder()
 
-with open(TRAIN_TEST_PATH + "final_tags.txt", 'rb') as tokenizer_file:
+with open(TRAIN_TEST_PATH + "tokenizer.txt", 'rb') as tokenizer_file:
     tokenizer = pickle.load(tokenizer_file)
 
 keras.losses.multitask_loss = multitask_loss
@@ -197,3 +197,4 @@ def search_results(search_string, num_results):
 
 if __name__ == '__main__':
     print(search_results('deploy python telegram bot', 2))
+    print(2)
