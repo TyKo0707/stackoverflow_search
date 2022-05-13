@@ -69,7 +69,7 @@ def predict_tags(text):
             prediction[i] = 1
         else:
             prediction[i] = 0
-    tags = tag_encoder.inverse_transform(prediction)
+    tags = tag_encoder.inverse_transform(np.array([prediction]))
     return tags
 
 
