@@ -7,23 +7,20 @@ env.read_env()
 FINAL_DATA = env.str("FINAL_DATA")
 
 preprocessed_data = pd.read_csv(FINAL_DATA, engine="pyarrow")
-preprocessed_data.tags = preprocessed_data.tags.apply(lambda x: x.split('|'))
-
-
+preprocessed_data1 = preprocessed_data[:500]
 
 tags = ['linux', 'apache', 'virtualhost']
-tags = set(tags)
-with timer("initial mask time", 5):
-    mask = [True if len(tags.intersection(set(preprocessed_data.iloc[i].tags))) >= 1 else False
-            for i in range(preprocessed_data.shape[0])]
-    data_new = preprocessed_data[mask]
-data_new.reset_index(inplace=True, drop=True)
 
 with timer("new mask time", 5):
-    preprocessed_data['new'] = True
-    mask = preprocessed_data.tags
-    mask = [True if len(tags.intersection(set(preprocessed_data.iloc[i].tags))) >= 1 else False
-            for i in range(preprocessed_data.shape[0])]
-    data_new = preprocessed_data[mask]
-data_new.reset_index(inplace=True, drop=True)
+    mask1 = preprocessed_data1['tags'].str.contains('|'.join(tags))
+    data_new1 = preprocessed_data1[mask1]
+data_new1.reset_index(inplace=True, drop=True)
+print(data_new1.shape[0])
 
+with timer("initial mask time", 5):
+    preprocessed_data1.tags = preprocessed_data1.tags.apply(lambda x: x.split('|'))
+    mask2 = [True if len(set(tags).intersection(set(preprocessed_data1.iloc[i].tags))) >= 1 else False
+             for i in range(preprocessed_data1.shape[0])]
+    data_new2 = preprocessed_data1[mask2]
+data_new2.reset_index(inplace=True, drop=True)
+print(data_new2.shape[0])
