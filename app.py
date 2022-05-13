@@ -16,8 +16,8 @@ async def on_startup(dispatcher):
         logger.exception('An unexpected error occurred')
 
 
-# async def on_shutdown(dispatcher):
-#     await bot.delete_webhook()
+async def on_shutdown(dispatcher):
+    await bot.delete_webhook()
 
 
 if __name__ == '__main__':
