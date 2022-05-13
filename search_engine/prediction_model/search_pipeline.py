@@ -119,8 +119,7 @@ def search_results(search_string, num_results):
 
     if len(tags) != 0:
         search_res = []
-        mask = [True if len(tags.intersection(set(preprocessed_data.iloc[i].tags))) >= 1 else False
-                for i in range(preprocessed_data.shape[0])]
+        mask = preprocessed_data['tags'].str.contains('|'.join(tags))
         data_new = preprocessed_data[mask]
         data_new.reset_index(inplace=True, drop=True)
         all_title_embeddings = []
@@ -147,12 +146,7 @@ def search_results(search_string, num_results):
             fill_value=0)
 
         for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
-            output = ''
-            for t in data_new.iloc[i].question_content.split():
-                if t.lower() in search_string:
-                    output += " <b style='color: #464646'>" + str(t) + "</b>"
-                else:
-                    output += " " + str(t)
+            output = data_new.iloc[i].question_content
             temp = {
                 'title': str(data_new.original_title[i]),
                 'url': str(data_new.question_url[i]),
@@ -177,12 +171,7 @@ def search_results(search_string, num_results):
 
         search_res = []
         for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
-            output = ''
-            for t in preprocessed_data.iloc[i].question_content.split():
-                if t.lower() in search_string:
-                    output += " <b style='color: #464646'>" + str(t) + "</b>"
-                else:
-                    output += " " + str(t)
+            output = preprocessed_data.iloc[i].question_content
             temp = {
                 'title': str(preprocessed_data.original_title[i]),
                 'url': str(preprocessed_data.question_url[i]),
@@ -196,5 +185,5 @@ def search_results(search_string, num_results):
 
 
 if __name__ == '__main__':
-    print(search_results('deploy python telegram bot', 2))
-    print(2)
+    print(search_results('error_log per virtual host one linux server running apache php 5 multiple virtual hosts '
+                         'separate log files seem separate php virtual hosts set apache php log easiest way would', 2))
