@@ -32,7 +32,7 @@ async def input_limit(message: Message):
     if text.isdecimal() and 0 < int(text) <= MAX_LIMIT:
         articles = search_results(TEXT, int(text))
 
-        result = "Articles:\n—————————"
+        result = "Articles:\n—————————\n"
         for i in range(5):
             result += fmt.text(
                 fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
