@@ -1,21 +1,28 @@
 import pandas as pd
-import sys
+from environs import Env
 
-chunk = pd.read_csv(f'{sys.path[1]}/collect_data/out.csv', chunksize=1000)
-df = pd.concat(chunk)
+env = Env()
+env.read_env()
+RAW_DATA_PATH = env.str("RAW_DATA_PATH")
 
-# Check if dataframe contains NaN values
-print(df.isna().sum())
+df1 = pd.read_parquet(f'{RAW_DATA_PATH}/raw_data1.gzip', engine="pyarrow")
+df2 = pd.read_parquet(f'{RAW_DATA_PATH}/raw_data2.gzip', engine="pyarrow")
+
+# Check if dataframes contains NaN values
+print(df1.isna().sum(), df2.isna().sum())
 
 # Drop NaN values
-df = df.dropna(axis=0)
+df1 = df1.dropna(axis=0)
+df2 = df2.dropna(axis=0)
 
-# Check if dataframe contains duplicated values
-print(df.duplicated().any())
+# Check if dataframes contains duplicated values
+print(df1.duplicated().any(), df2.duplicated().any())
 
 # Combining duplicate titles with one answer to one title with many answers (also combining their score)
-grouped_data = df.groupby(['id', 'title', 'body', 'tags'], as_index=False)\
+de_duplicated_data1 = df1.groupby(['id', 'title', 'body', 'tags'], as_index=False) \
     .agg(combined_answers=('answers', lambda x: "\n".join(x)), combined_score=('score', 'sum'))
-de_duplicated_data = pd.DataFrame(grouped_data)
+de_duplicated_data2 = df2.groupby(['id', 'title', 'body', 'tags'], as_index=False) \
+    .agg(combined_answers=('answers', lambda x: "\n".join(x)), combined_score=('score', 'sum'))
 
-print(de_duplicated_data.head(), de_duplicated_data.columns)
+de_duplicated_data1.to_parquet(f"{RAW_DATA_PATH}de_duplicated_data1.gzip", compression='gzip', index=False)
+de_duplicated_data2.to_parquet(f"{RAW_DATA_PATH}de_duplicated_data2.gzip", compression='gzip', index=False)
