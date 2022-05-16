@@ -37,6 +37,7 @@ def build_query(min_id, max_id):
     return query
 
 
+# saving data in csv by 5m rows (with filter 5m rows ~= 850k rows)
 for i in range(6):
     query = build_query(35e6 + 5e6 * i, 35e6 + 5e6 * (i + 1))
     try:
