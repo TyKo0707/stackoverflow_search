@@ -33,7 +33,7 @@ async def input_limit(message: Message):
         articles = search_results(TEXT, int(text))
 
         result = "Articles:\n—————————"
-        for i in range(int(text)):
+        for i in range(5):
             result += fmt.text(
                 fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
                 fmt.text(f'{fmt.hbold("Similarity score:")} {articles[i]["similarity_score"]}'),
