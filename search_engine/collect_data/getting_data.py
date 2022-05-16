@@ -43,7 +43,7 @@ for i in range(6):
         dataframe = (
             client.query(query).result().to_dataframe()
         )
-        dataframe.to_parquet(f"out{i + 1}.csv", compression='gzip', index=False)
+        dataframe.to_parquet(f"out{i + 1}.gzip", compression='gzip', index=False)
         logger.info(f"Data (5m items (from {35 + 5 * i}m to {35 + 5 * (i + 1)}m)) "
                     f"was successfully downloaded and converted to CSV-file")
     except Exception as ex:
