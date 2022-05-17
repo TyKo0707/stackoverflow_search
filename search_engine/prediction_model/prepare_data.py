@@ -68,12 +68,12 @@ if __name__ == '__main__':
             embedding_matrix[i] = w2v_model.wv[word]
     print(embedding_matrix.shape)
 
-    np.save(TRAIN_TEST_PATH + 'x_train.npy', X_train)
-    np.save(TRAIN_TEST_PATH + 'x_test.npy', X_test)
-    np.save(TRAIN_TEST_PATH + 'y_train.npy', y_train)
-    np.save(TRAIN_TEST_PATH + 'y_test.npy', y_test)
-    np.save(TRAIN_TEST_PATH + 'x_train_padded.npy', X_train_padded)
-    np.save(TRAIN_TEST_PATH + 'x_test_padded.npy', X_test_padded)
-    np.save(TRAIN_TEST_PATH + 'embedding_matrix.npy', embedding_matrix)
+    # np.save(TRAIN_TEST_PATH + 'x_train.npy', X_train)
+    # np.save(TRAIN_TEST_PATH + 'x_test.npy', X_test)
+    # np.save(TRAIN_TEST_PATH + 'y_train.npy', y_train)
+    # np.save(TRAIN_TEST_PATH + 'y_test.npy', y_test)
+    # np.save(TRAIN_TEST_PATH + 'x_train_padded.npy', X_train_padded)
+    # np.save(TRAIN_TEST_PATH + 'x_test_padded.npy', X_test_padded)
+    np.savez_compressed(TRAIN_TEST_PATH + 'embedding_matrix.npz', embedding_matrix)
 
     logger.info("All datasets were saved")
