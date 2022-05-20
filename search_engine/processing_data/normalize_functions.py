@@ -44,14 +44,14 @@ def remove_stopwords(words):
 
 def normalize(words):
     words = to_lowercase(words)
-    words = RegexpTokenizer(r'[a-zA-Z0-9._+#]+').tokenize(' '.join(words))
+    words = RegexpTokenizer(r"[a-zA-Z0-9._+#]+").tokenize(' '.join(words))
     words = remove_stopwords(words)
     return words
 
 
 def tokenize_code(text):
     # A very basic procedure for tokenizing code strings.
-    return RegexpTokenizer(r'[a-zA-Z0-9._+#]+').tokenize(text)
+    return RegexpTokenizer(r"[a-zA-Z0-9._+#]+").tokenize(text)
 
 
 def preprocess_text(text):

@@ -13,7 +13,7 @@ EN = spacy.load('en_core_web_sm')
 
 
 def save_parts(dataframe, nd):
-    for i in range(int(dataframe.shape[0] / 100000) + 1):
+    for i in range(5, int(dataframe.shape[0] / 100000) + 1):
         if i == int(dataframe.shape[0] / 100000):
             df = dataframe[int(i * 10e4):int(dataframe.shape[0])]
         else:
@@ -66,5 +66,5 @@ def normalize_content(dataframe):
 df1 = pd.read_parquet(f'{RAW_DATA_PATH}/de_duplicated_data1.gzip', engine="pyarrow")
 save_parts(df1, 1)
 
-df2 = pd.read_parquet(f'{RAW_DATA_PATH}/de_duplicated_data2.gzip', engine="pyarrow")
-save_parts(df2, 2)
+# df2 = pd.read_parquet(f'{RAW_DATA_PATH}/de_duplicated_data2.gzip', engine="pyarrow")
+# save_parts(df2, 2)
