@@ -10,6 +10,7 @@ env = Env()
 env.read_env()
 RAW_DATA_PATH = env.str("RAW_DATA_PATH")
 SITE = StackAPI(name='stackoverflow')
+categories_dict = {'c%23': 'c#', 'c%2b%2b': 'c++'}
 
 
 class CategoryDataset:
@@ -39,10 +40,11 @@ class CategoryDataset:
                     f'https://stackoverflow.com/search?page={i}&tab=Relevance&pagesize=50&q={search_query}').content
             soup = BeautifulSoup(result_html, "html.parser")
             ids = soup.find_all('div', class_='s-post-summary js-post-summary')
+            category = categories_dict[search_text] if search_text in categories_dict.keys() else search_text
             if ids:
                 for row in ids:
                     id_list.append(int(row.attrs['data-post-id']))
-                    categories_list.append(search_text)
+                    categories_list.append(category)
             else:
                 raise TimeoutError
         self.df = pd.concat([self.df, pd.DataFrame(pd.DataFrame.from_dict(
@@ -61,7 +63,7 @@ class CategoryDataset:
 
     def create_and_save_dataset(self):
         i = 0
-        while i < len(self.categories):
+        while i < 3:
             c_type = 'tag' if ' ' not in self.categories[i] else 'query'
             # 2500 and 500
             size = 500 if c_type == 'tag' else 100
