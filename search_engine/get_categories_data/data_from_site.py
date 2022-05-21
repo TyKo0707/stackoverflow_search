@@ -57,11 +57,11 @@ class CategoryDataset:
                 s = row['title']
                 s = re.sub(r'[&#39;]', '', s)
                 self.df.loc[self.df['article_index'] == row['question_id'], 'tags'] = '|'.join(row['tags'])
-                self.df.loc[self.df['article_index'] == row['question_id'], 'titles'] = preprocess_text(s)
+                self.df.loc[self.df['article_index'] == row['question_id'], 'title'] = preprocess_text(s)
 
     def create_and_save_dataset(self):
         i = 0
-        while i < 1:
+        while i < len(self.categories):
             c_type = 'tag' if ' ' not in self.categories[i] else 'query'
             # 2500 and 500
             size = 500 if c_type == 'tag' else 100
