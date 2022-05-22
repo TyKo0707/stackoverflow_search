@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from search_engine.processing_data.normalize_functions import preprocess_text
 from stackapi import StackAPI
 from environs import Env
-import re
 
 env = Env()
 env.read_env()
@@ -15,10 +14,6 @@ categories_dict = {'c%23': 'c#', 'c%2b%2b': 'c++'}
 
 class CategoryDataset:
     def __init__(self, categories):
-        # self.search_text = search_text
-        # self.search_size = search_size
-        # self.idx = []
-        # self.c_type = c_type
         self.df = pd.DataFrame()
         self.df['article_index'] = None
         self.df['title'] = None
@@ -53,23 +48,28 @@ class CategoryDataset:
 
     def filter_values(self, search_size, start_index):
         for i in range(int(search_size / 20)):
-            qs = SITE.fetch('questions',
-                            ids=self.df.article_index.values[start_index + i * 20: start_index + (i + 1) * 20])
+            try:
+                qs = SITE.fetch('questions',
+                                ids=self.df.article_index.values[start_index + i * 20: start_index + (i + 1) * 20])
+            except:
+                input("Change location in VPN (then enter ok): ")
+                qs = SITE.fetch('questions',
+                                ids=self.df.article_index.values[start_index + i * 20: start_index + (i + 1) * 20])
             for row in qs['items']:
                 s = row['title']
-                s = re.sub(r'[&#39;]', '', s)
+                s = s.replace('&#39;', '')
                 self.df.loc[self.df['article_index'] == row['question_id'], 'tags'] = '|'.join(row['tags'])
                 self.df.loc[self.df['article_index'] == row['question_id'], 'title'] = preprocess_text(s)
 
     def create_and_save_dataset(self):
         i = 0
-        while i < 3:
+        while i < len(self.categories):
             c_type = 'tag' if ' ' not in self.categories[i] else 'query'
-            # 2500 and 500
-            size = 500 if c_type == 'tag' else 100
+            size = 2500 if c_type == 'tag' else 500
             try:
                 start_index = self.get_ids(self.categories[i], c_type, size)
                 self.filter_values(size, start_index)
+                print(self.df.tail(10))
             except TimeoutError:
                 print('Please enter captcha for ', self.categories[i])
                 input('Input "ok": ')
