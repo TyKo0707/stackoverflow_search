@@ -71,7 +71,7 @@ class CategoryDataset:
 
     def create_and_save_dataset(self):
         i = 0
-        while i < len(categories):
+        while i < len(self.categories):
             c_type = 'tag' if ' ' not in self.categories[i] else 'query'
             size = 2500 if c_type == 'tag' else 500
             try:
