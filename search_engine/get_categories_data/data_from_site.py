@@ -69,6 +69,7 @@ class CategoryDataset:
             try:
                 start_index = self.get_ids(self.categories[i], c_type, size)
                 self.filter_values(size, start_index)
+                self.df.to_csv(f'{RAW_DATA_PATH}data_b_c/categories_data.csv', index=False)
                 print(self.df.tail(10))
             except TimeoutError:
                 print('Please enter captcha for ', self.categories[i])
