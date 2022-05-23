@@ -4,9 +4,12 @@ from bs4 import BeautifulSoup
 from search_engine.processing_data.normalize_functions import preprocess_text
 from stackapi import StackAPI
 from environs import Env
+from stackapi.stackapi import StackAPIError
+from logger import get_logger
 
 env = Env()
 env.read_env()
+logger = get_logger()
 RAW_DATA_PATH = env.str("RAW_DATA_PATH")
 SITE = StackAPI(name='stackoverflow')
 categories_dict = {'c%23': 'c#', 'c%2b%2b': 'c++'}
@@ -51,10 +54,15 @@ class CategoryDataset:
             try:
                 qs = SITE.fetch('questions',
                                 ids=self.df.article_index.values[start_index + i * 20: start_index + (i + 1) * 20])
-            except:
-                input("Change location in VPN (then enter ok): ")
-                qs = SITE.fetch('questions',
-                                ids=self.df.article_index.values[start_index + i * 20: start_index + (i + 1) * 20])
+            except StackAPIError as ex:
+                if ex.message == 'no method found with this name':
+                    self.filter_values(search_size - 500, start_index)
+                elif 'too many requests from this IP, more requests available' in ex.message:
+                    input("Change location in VPN (then enter ok): ")
+                    self.filter_values(search_size, start_index)
+                else:
+                    logger.exception('An unexpected error occurred')
+
             for row in qs['items']:
                 s = row['title']
                 s = s.replace('&#39;', '')
@@ -63,19 +71,19 @@ class CategoryDataset:
 
     def create_and_save_dataset(self):
         i = 0
-        while i < len(self.categories):
+        while i < len(categories):
             c_type = 'tag' if ' ' not in self.categories[i] else 'query'
             size = 2500 if c_type == 'tag' else 500
             try:
                 start_index = self.get_ids(self.categories[i], c_type, size)
                 self.filter_values(size, start_index)
-                self.df.to_csv(f'{RAW_DATA_PATH}data_b_c/categories_data.csv', index=False)
-                print(self.df.tail(10))
+                df = self.df.dropna()
+                df.drop(columns='article_index', inplace=True)
+                df.to_csv(f'{RAW_DATA_PATH}data_b_c/categories_data.csv', index=False, mode='a')
+                logger.info(f'Category {self.categories[i]} was successfully added to the dataset')
+                print(df.tail(10))
             except TimeoutError:
                 print('Please enter captcha for ', self.categories[i])
                 input('Input "ok": ')
                 continue
             i += 1
-        df = self.df.dropna()
-        df.drop(columns='article_index', inplace=True)
-        df.to_csv(f'{RAW_DATA_PATH}data_b_c/categories_data.csv', index=False)
