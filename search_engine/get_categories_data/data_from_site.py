@@ -80,7 +80,7 @@ class CategoryDataset:
                 self.filter_values(size, start_index)
                 df = self.df.dropna()
                 df.drop(columns='article_index', inplace=True)
-                df.to_csv(f'{RAW_DATA_PATH}data_b_c/categories_data.csv', index=False, mode='a')
+                df.to_csv(f'{DATA_PATH}data_b_c/categories_data.csv', index=False, mode='a')
                 logger.info(f'Category {self.categories[i]} was successfully added to the dataset')
                 print(df.tail(10))
             except TimeoutError:
