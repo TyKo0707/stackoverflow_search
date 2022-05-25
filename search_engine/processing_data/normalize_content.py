@@ -7,7 +7,7 @@ from search_engine.processing_data.html_to_text import content_to_tokens
 
 env = Env()
 env.read_env()
-RAW_DATA_PATH = env.str("RAW_DATA_PATH")
+DATA_PATH = env.str("DATA_PATH")
 
 EN = spacy.load('en_core_web_sm')
 
@@ -20,7 +20,7 @@ def save_parts(dataframe, nd):
             df = dataframe[int(i * 10e4):int((i + 1) * 10e4)]
 
         content_token_df = normalize_content(df)
-        content_token_df.to_parquet(f"{RAW_DATA_PATH}/df{nd}/main_data_{i}.gzip", compression='gzip', index=False)
+        content_token_df.to_parquet(f"{DATA_PATH}/df{nd}/main_data_{i}.gzip", compression='gzip', index=False)
 
 
 def normalize_content(dataframe):
@@ -63,7 +63,7 @@ def normalize_content(dataframe):
     return final_data
 
 
-df1 = pd.read_parquet(f'{RAW_DATA_PATH}/de_duplicated_data1.gzip', engine="pyarrow")
+df1 = pd.read_parquet(f'{DATA_PATH}/de_duplicated_data1.gzip', engine="pyarrow")
 save_parts(df1, 1)
 
 # df2 = pd.read_parquet(f'{RAW_DATA_PATH}/de_duplicated_data2.gzip', engine="pyarrow")

@@ -7,7 +7,7 @@ from environs import Env
 
 env = Env()
 env.read_env()
-RAW_DATA_PATH = env.str("RAW_DATA_PATH")
+DATA_PATH = env.str("DATA_PATH")
 SITE = StackAPI(name='stackoverflow')
 categories_dict = {'c%23': 'c#', 'c%2b%2b': 'c++'}
 
@@ -69,7 +69,7 @@ class CategoryDataset:
             try:
                 start_index = self.get_ids(self.categories[i], c_type, size)
                 self.filter_values(size, start_index)
-                self.df.to_csv(f'{RAW_DATA_PATH}data_b_c/categories_data.csv', index=False)
+                self.df.to_csv(f'{DATA_PATH}data_b_c/categories_data.csv', index=False)
                 print(self.df.tail(10))
             except TimeoutError:
                 print('Please enter captcha for ', self.categories[i])
@@ -78,4 +78,4 @@ class CategoryDataset:
             i += 1
         df = self.df.dropna()
         df.drop(columns='article_index', inplace=True)
-        df.to_csv(f'{RAW_DATA_PATH}data_b_c/categories_data.csv', index=False)
+        df.to_csv(f'{DATA_PATH}data_b_c/categories_data.csv', index=False)

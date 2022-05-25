@@ -3,10 +3,10 @@ from environs import Env
 
 env = Env()
 env.read_env()
-RAW_DATA_PATH = env.str("RAW_DATA_PATH")
+DATA_PATH = env.str("DATA_PATH")
 
-df1 = pd.read_parquet(f'{RAW_DATA_PATH}/raw_data1.gzip', engine="pyarrow")
-df2 = pd.read_parquet(f'{RAW_DATA_PATH}/raw_data2.gzip', engine="pyarrow")
+df1 = pd.read_parquet(f'{DATA_PATH}/raw_data1.gzip', engine="pyarrow")
+df2 = pd.read_parquet(f'{DATA_PATH}/raw_data2.gzip', engine="pyarrow")
 
 # Check if dataframes contains NaN values
 print(df1.isna().sum(), df2.isna().sum())
@@ -24,5 +24,5 @@ de_duplicated_data1 = df1.groupby(['id', 'title', 'body', 'tags'], as_index=Fals
 de_duplicated_data2 = df2.groupby(['id', 'title', 'body', 'tags'], as_index=False) \
     .agg(combined_answers=('answers', lambda x: "\n".join(x)), combined_score=('score', 'sum'))
 
-de_duplicated_data1.to_parquet(f"{RAW_DATA_PATH}de_duplicated_data1.gzip", compression='gzip', index=False)
-de_duplicated_data2.to_parquet(f"{RAW_DATA_PATH}de_duplicated_data2.gzip", compression='gzip', index=False)
+de_duplicated_data1.to_parquet(f"{DATA_PATH}de_duplicated_data1.gzip", compression='gzip', index=False)
+de_duplicated_data2.to_parquet(f"{DATA_PATH}de_duplicated_data2.gzip", compression='gzip', index=False)
