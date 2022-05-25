@@ -37,8 +37,11 @@ class Encoder:
         for i in df.iterrows():
             t = []
             for j in i[1].tags.split('|'):
-                code = keys.loc[keys['tag'] == j].code.values[0]
-                t.append(code)
+                try:
+                    code = keys.loc[keys['tag'] == j].code.values[0]
+                    t.append(code)
+                except:
+                    continue
             new_tags.append(t)
         df.tags = ['|'.join([str(j) for j in i]) for i in new_tags]
 
@@ -56,8 +59,11 @@ class Decoder:
         for i in df.iterrows():
             t = []
             for j in i[1].tags.split('|'):
-                tag = self.keys.loc[self.keys['code'] == int(j)].tag.values[0]
-                t.append(tag)
+                try:
+                    tag = self.keys.loc[self.keys['code'] == int(j)].tag.values[0]
+                    t.append(tag)
+                except:
+                    continue
             new_tags.append(t)
         df.tags = ['|'.join([str(j) for j in i]) for i in new_tags]
 
