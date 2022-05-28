@@ -60,27 +60,16 @@ def question_to_vec(question, embeddings, dim=300):
         return question_embedding
 
 
-def delete_elem_from_tags(df, condition, tag_to_delete):
-    ind = 0
-    for i in df.tags.values:
-        l_buff = i[::]
-        if condition in l_buff and tag_to_delete in l_buff:
-            del l_buff[l_buff.index(tag_to_delete)]
-            df.at[ind, tags] = l_buff
-        ind += 1
-
-
 def split_tags(string):
     if string:
         return [int(i) for i in string.split('|')]
 
 
 df_title = pd.read_csv(DATA_PATH + 'dec_dataset.csv', engine='pyarrow').sample(frac=1)
-df_tags = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow')
+df_tags = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow').sample(frac=1)
 df_tags.tags = df_tags.tags.apply(split_tags)
 df_tags.dropna(inplace=True, axis=0)
 tags = df_tags.tags
-df_keys = pd.read_csv(DATA_PATH + 'tags_keys.csv', engine='pyarrow')
 
 titles = df_title.title
 
@@ -92,13 +81,6 @@ def convert_titles_to_vec(df: pd.DataFrame, column_name: str):
         t_vectors.append(t_vector)
     return np.array(t_vectors)
 
-
-def code_from_key(keys_data, key):
-    if key in keys_data.tag.values:
-        return keys_data[keys_data.tag == key].code.values[0]
-
-
-delete_elem_from_tags(df_tags, code_from_key(df_keys, 'asp.net'), code_from_key(df_keys, 'c#'))
 
 y_title = pd.get_dummies(df_title['category'])
 y_tags = pd.get_dummies(df_tags['category'])
