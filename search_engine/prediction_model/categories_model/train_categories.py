@@ -15,6 +15,10 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report
+from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.svm import LinearSVC
 from logger import get_logger
 
@@ -56,8 +60,27 @@ def question_to_vec(question, embeddings, dim=300):
         return question_embedding
 
 
+def delete_elem_from_tags(df, condition, tag_to_delete):
+    ind = 0
+    for i in df.tags.values:
+        l_buff = i[::]
+        if condition in l_buff and tag_to_delete in l_buff:
+            del l_buff[l_buff.index(tag_to_delete)]
+            df.at[ind, tags] = l_buff
+        ind += 1
+
+
+def split_tags(string):
+    if string:
+        return [int(i) for i in string.split('|')]
+
+
 df_title = pd.read_csv(DATA_PATH + 'dec_dataset.csv', engine='pyarrow').sample(frac=1)
-df_tags = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow').sample(frac=1)[:2000]
+df_tags = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow')
+df_tags.tags = df_tags.tags.apply(split_tags)
+df_tags.dropna(inplace=True, axis=0)
+tags = df_tags.tags
+df_keys = pd.read_csv(DATA_PATH + 'tags_keys.csv', engine='pyarrow')
 
 titles = df_title.title
 
@@ -70,40 +93,45 @@ def convert_titles_to_vec(df: pd.DataFrame, column_name: str):
     return np.array(t_vectors)
 
 
-def split_tags(string):
-    if string:
-        return [int(i) for i in string.split('|')]
+def code_from_key(keys_data, key):
+    if key in keys_data.tag.values:
+        return keys_data[keys_data.tag == key].code.values[0]
 
 
-df_tags.tags = df_tags.tags.apply(split_tags)
-df_tags.dropna(inplace=True, axis=0)
-tags = df_tags.tags
+delete_elem_from_tags(df_tags, code_from_key(df_keys, 'asp.net'), code_from_key(df_keys, 'c#'))
 
 y_title = pd.get_dummies(df_title['category'])
 y_tags = pd.get_dummies(df_tags['category'])
 
-c_t_d = ['c#', 'c++', '.net', 'c']
-
-
-def in_ctd(s):
-    if s not in c_t_d:
-        return True
-    else:
-        return False
-
-
-mask = df_title['category'].apply(in_ctd)
-
-df_title = df_title[mask]
+# c_t_d = ['c#', 'c++', '.net', 'c']
+#
+#
+# def in_ctd(s):
+#     if s not in c_t_d:
+#         return True
+#     else:
+#         return False
+#
+#
+# mask = df_title['category'].apply(in_ctd)
+#
+# df_title = df_title[mask]
+#
+# mask = df_tags['category'].apply(in_ctd)
+#
+# df_tags = df_tags[mask]
 
 titles_vectors = convert_titles_to_vec(df_title, 'title')
+
+multilabel_binarizer = MultiLabelBinarizer()
+y_bin = multilabel_binarizer.fit_transform(df_tags.tags)
 
 X_train_title, X_test_title, y_train_title, y_test_title = train_test_split(titles_vectors,
                                                                             df_title['category'],
                                                                             test_size=0.2,
                                                                             random_state=0)
-# X_train_tags, X_test_tags, y_train_tags, y_test_tags = train_test_split(tags, y_tags, test_size=0.2,
-#                                                                         random_state=0)
+X_train_tags, X_test_tags, y_train_tags, y_test_tags = train_test_split(y_bin, df_tags['category'], test_size=0.2,
+                                                                        random_state=0)
 
 # region model
 # X_train_title_padded = tokenizer.texts_to_sequences(X_train_title)
@@ -147,16 +175,24 @@ X_train_title, X_test_title, y_train_title, y_test_title = train_test_split(titl
 # print("test loss, test acc:", results)
 # endregion
 
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report
+# region title model
+# logreg_title = LogisticRegression(n_jobs=1, C=1e5)
+# logreg_title = logreg_title.fit(X_train_title, y_train_title)
+# y_pred = logreg_title.predict(X_test_title)
+# pickle.dump(logreg_title, open('model_title.pkl', 'wb'))
+# print('accuracy %s' % accuracy_score(y_pred, y_test_title))
+#
+# print(classification_report(y_test_title, y_pred, target_names=logreg_title.classes_))
+# endregion
 
-logreg = LogisticRegression(n_jobs=1, C=1e5)
-logreg = logreg.fit(X_train_title, y_train_title)
-y_pred = logreg.predict(X_test_title)
-print('accuracy %s' % accuracy_score(y_pred, y_test_title))
+logreg_tags = LogisticRegression(n_jobs=1, C=1e5)
+logreg_tags = logreg_tags.fit(X_train_tags, y_train_tags)
+y_pred = logreg_tags.predict(X_test_tags)
+pickle.dump(logreg_tags, open('model_tags.pkl', 'wb'))
+print('accuracy %s' % accuracy_score(y_pred, y_test_tags))
 
-print(classification_report(y_test_title, y_pred, target_names=logreg.classes_))
+print(classification_report(y_test_tags, y_pred, target_names=logreg_tags.classes_))
+
 # region base
 # sgd = SGDClassifier()
 # lr = LogisticRegression()
