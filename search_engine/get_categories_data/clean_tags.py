@@ -1,10 +1,13 @@
 import pandas as pd
 from environs import Env
+from logger import get_logger
 
 env = Env()
 env.read_env()
 
 DATA_PATH = env.str("DATA_PATH")
+
+logger = get_logger(handle_errors=False)
 
 
 def code_from_key(keys_data, key):
@@ -47,11 +50,21 @@ delete_elem_from_tags(df_enc, 'c#', 'asp.net')
 delete_elem_from_tags(df_enc, 'c#', '.net')
 delete_elem_from_tags(df_enc, 'с++', 'с')
 delete_elem_from_tags(df_enc, 'с', 'c++')
+delete_elem_from_tags(df_enc, 'frontend', 'javascript')
+delete_elem_from_tags(df_enc, 'javascript web', 'angularjs')
+delete_elem_from_tags(df_enc, 'javascript web', 'reactjs')
 df_enc.dropna(inplace=True, axis=0)
 df_enc.to_csv(DATA_PATH + 'enc_dataset.csv', index=False)
+logger.info("df_enc dataset was modified")
 delete_elem_from_tags(df_dec, 'asp.net', 'c#', 'str')
-delete_elem_from_tags(df_dec, 'asp.net', 'c#', 'str')
-delete_elem_from_tags(df_dec, 'asp.net', 'c#', 'str')
-delete_elem_from_tags(df_dec, 'asp.net', 'c#', 'str')
+delete_elem_from_tags(df_dec, 'c#', 'asp.net', 'str')
+delete_elem_from_tags(df_dec, 'c#', '.net', 'str')
+delete_elem_from_tags(df_dec, '.net', 'c#', 'str')
+delete_elem_from_tags(df_dec, 'c++', 'c', 'str')
+delete_elem_from_tags(df_dec, 'c', 'c++', 'str')
+delete_elem_from_tags(df_dec, 'frontend', 'javascript', 'str')
+delete_elem_from_tags(df_dec, 'javascript web', 'angularjs', 'str')
+delete_elem_from_tags(df_dec, 'javascript web', 'reactjs', 'str')
 df_dec.dropna(inplace=True, axis=0)
 df_dec.to_csv(DATA_PATH + 'dec_dataset.csv', index=False)
+logger.info("df_dec dataset was modified")
