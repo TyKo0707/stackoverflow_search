@@ -13,46 +13,37 @@ def code_from_key(keys_data, key):
 
 
 def delete_elem_from_tags(df, condition, tag_to_delete, mode='num'):
-    ind = 30939
+    ind = 0
+
+    def delete_tag(index, cond, ttd):
+        for i in df.tags.values:
+            if not i == '':
+                if mode == 'num':
+                    i = [int(j) for j in i.split('|')]
+                elif mode == 'str':
+                    i = [str(j) for j in i.split('|')]
+                if df.category[index] == condition:
+                    if cond in i and ttd in i:
+                        l_buff = i[::]
+                        del l_buff[l_buff.index(ttd)]
+                        df.at[index, "tags"] = '|'.join([str(j) for j in l_buff])
+            index += 1
+
     if mode == 'num':
         cond_key = code_from_key(df_keys, condition)
         ttd_key = code_from_key(df_keys, tag_to_delete)
-        for i in df.tags.values:
-            if df.category[ind] == condition:
-                l_buff = i[::]
-                if cond_key in l_buff and ttd_key in l_buff:
-                    del l_buff[l_buff.index(ttd_key)]
-                    df.at[ind, "tags"] = l_buff
-                ind += 1
+        delete_tag(ind, cond_key, ttd_key)
     elif mode == 'str':
-        for i in df.tags.values:
-            if df.category[ind] == condition:
-                l_buff = i[::]
-                if condition in l_buff and tag_to_delete in l_buff:
-                    del l_buff[l_buff.index(tag_to_delete)]
-                    df.at[ind, "tags"] = l_buff
-                ind += 1
+        delete_tag(ind, condition, tag_to_delete)
 
 
-df_dec = pd.read_csv(DATA_PATH + 'dec_dataset.csv', engine='pyarrow')[30939:30943]
-df_enc = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow')[30939:30943]
+df_dec = pd.read_csv(DATA_PATH + 'dec_dataset.csv', engine='pyarrow')
+df_enc = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow')
 df_keys = pd.read_csv(DATA_PATH + 'tags_keys.csv', engine='pyarrow')
 
-
-def split_tags(string):
-    if string:
-        try:
-            return [int(i) for i in string.split('|')]
-        except:
-            return [str(i) for i in string.split('|')]
-
-
-df_dec.tags = df_dec.tags.apply(split_tags)
-df_dec.dropna(inplace=True, axis=0)
-df_enc.tags = df_enc.tags.apply(split_tags)
-df_enc.dropna(inplace=True, axis=0)
-
 delete_elem_from_tags(df_enc, 'asp.net', 'c#')
+df_enc.dropna(inplace=True, axis=0)
+df_enc.to_csv(DATA_PATH + 'enc_dataset.csv', index=False)
 delete_elem_from_tags(df_dec, 'asp.net', 'c#', 'str')
-
-print(2)
+df_dec.dropna(inplace=True, axis=0)
+df_dec.to_csv(DATA_PATH + 'dec_dataset.csv', index=False)
