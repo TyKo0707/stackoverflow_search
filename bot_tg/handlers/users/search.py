@@ -6,7 +6,6 @@ from bot_tg.data.config import MAX_LIMIT
 from aiogram.utils.markdown import hlink
 import aiogram.utils.markdown as fmt
 from aiogram.dispatcher.filters import Text
-import random
 
 
 @dp.message_handler(Text(equals='Search🔎'), state=[States.start, None], chat_type=ChatType.PRIVATE)
@@ -30,10 +29,12 @@ async def input_limit(message: Message):
     text = message.text
     global TEXT
     if text.isdecimal() and 0 < int(text) <= MAX_LIMIT:
-        articles = search_results(TEXT, int(text))
+        await message.answer("Searching...")
+        num = int(text)
+        articles = search_results(TEXT, num)
 
         result = "Articles:\n—————————"
-        for i in range(5):
+        for i in range(num):
             result += fmt.text(
                 fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
                 fmt.text(f'{fmt.hbold("Similarity score:")} {articles[i]["similarity_score"]}'),

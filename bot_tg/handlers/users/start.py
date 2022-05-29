@@ -17,7 +17,7 @@ async def start(message: Message, state: FSMContext):
     text = fmt.text(f"Hi, I am stackoverflow search bot.\n"
                     f"{fmt.hbold('Enter')} the request, and I {fmt.hbold('will find')} "
                     f"corresponding articles."
-                    f"\nClick the {fmt.hbold('search button')} to start searching for the articles")
+                    f"\nUse /search command or click the button (not for groups) to start searching for the articles")
     if message.chat.type in [ChatType.SUPERGROUP, ChatType.GROUP]:
         await message.reply(text)
     else:
