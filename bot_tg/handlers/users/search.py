@@ -29,7 +29,7 @@ async def input_limit(message: Message):
     text = message.text
     global TEXT
     if text.isdecimal() and 0 < int(text) <= MAX_LIMIT:
-        await message.answer("Searching...")
+        await message.reply("Searching...")
         num = int(text)
         articles = search_results(TEXT, num)
 
