@@ -25,8 +25,10 @@ MAX_SEQUENCE_LENGTH = 300
 TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
 nltk.download('stopwords')
 
-preprocessed_data = pd.read_csv(FINAL_DATA, engine="pyarrow")
-title_embeddings = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npy')
+
+preprocessed_data = pd.read_parquet(FINAL_DATA, engine="pyarrow")
+title_embeddings = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npz', allow_pickle=True)
+title_embeddings = title_embeddings.f.arr_0
 
 # Import saved Word2vec Embeddings
 w2v_model = gensim.models.word2vec.Word2Vec.load(MODELS + 'SO_word2vec_embeddings.bin')
