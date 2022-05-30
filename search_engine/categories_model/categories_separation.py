@@ -69,4 +69,4 @@ if __name__ == '__main__':
                 save_dataset(key, df, True, 'w')
             else:
                 save_dataset(key, df, False, 'a')
-            print(f'From {i * 10000} to {(i + 1) * 10000} was processed!')
+        print(f'From {i * 10000} to {(i + 1) * 10000} was processed!')
