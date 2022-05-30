@@ -31,6 +31,7 @@ tags = df_tags.tags
 
 multilabel_binarizer = MultiLabelBinarizer()
 y_bin = multilabel_binarizer.fit_transform(df_tags.tags)
+pickle.dump(multilabel_binarizer, open(MODELS + 'mlb.pkl', 'wb'))
 
 X_train_tags, X_test_tags, y_train_tags, y_test_tags = train_test_split(y_bin, df_tags['category'], test_size=0.2,
                                                                         random_state=0)
