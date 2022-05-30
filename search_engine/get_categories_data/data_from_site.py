@@ -81,7 +81,10 @@ class CategoryDataset:
                 df = self.df.dropna()
                 df.drop(columns='article_index', inplace=True)
                 df.drop_duplicates(inplace=True)
-                df.to_csv(DATA_PATH + 'categories_data.csv', index=False, mode='a')
+                if i == 0:
+                    df.to_csv(DATA_PATH + 'categories_data.csv', index=False, mode='a', header=True)
+                else:
+                    df.to_csv(DATA_PATH + 'categories_data.csv', index=False, mode='a', header=False)
                 logger.info(f'Category {self.categories[i]} was successfully added to the dataset')
                 print(df.tail(10))
             except TimeoutError:
