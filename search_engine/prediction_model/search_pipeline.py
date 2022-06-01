@@ -11,6 +11,7 @@ from keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
 import pickle
+import os
 import keras.backend as K
 import nltk
 from logger import get_logger
@@ -21,17 +22,50 @@ env = Env()
 env.read_env()
 FINAL_DATA = env.str("FINAL_DATA")
 MODELS = env.str("MODELS")
+DATA_PATH = env.str("DATA_PATH")
 MAX_SEQUENCE_LENGTH = 300
 TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
 nltk.download('stopwords')
 
-
-preprocessed_data = pd.read_parquet(FINAL_DATA, engine="pyarrow")
+df_keys = pd.read_csv(DATA_PATH + 'tags_keys.csv', engine='pyarrow')
 title_embeddings = np.load(TRAIN_TEST_PATH + 'embedding_matrix.npz', allow_pickle=True)
 title_embeddings = title_embeddings.f.arr_0
 
 # Import saved Word2vec Embeddings
 w2v_model = gensim.models.word2vec.Word2Vec.load(MODELS + 'SO_word2vec_embeddings.bin')
+
+model_tags = pickle.load(open(MODELS + 'model_tags.pkl', 'rb'))
+mlb = pickle.load(open(MODELS + 'mlb.pkl', 'rb'))
+
+directory = 'C:/Users/38097/Desktop/so_search/data/dbc/'
+dict_of_dfs = {}
+
+for filename in os.listdir(directory):
+    f = os.path.join(directory, filename)
+    if os.path.isfile(f):
+        df = pd.read_csv(f, engine='pyarrow')
+        dict_of_dfs[filename[:-4]] = df
+
+
+def encode_tags(list_of_tags: list, keys: pd.DataFrame):
+    new_l = []
+    for k in list_of_tags:
+        if k in keys.tag.values:
+            new_l.append(keys[keys.tag == k].code.values[0])
+
+    return new_l
+
+
+def get_category_df(list_of_tags, num_of_tags):
+    t = encode_tags(list_of_tags, df_keys)
+    tags = mlb.transform([t, []])
+    full_res = list(model_tags.predict_proba(tags)[0])
+    if max(full_res) < 0.95:
+        res = [model_tags.classes_[full_res.index(c)] for c in sorted(full_res)[-num_of_tags:]]
+        return pd.concat([dict_of_dfs[i] for i in res])
+    else:
+        res = model_tags.classes_[full_res.index(max(full_res))]
+        return dict_of_dfs[res]
 
 
 def f1_metric(y_true, y_pred):
@@ -103,11 +137,6 @@ def question_to_vec(question, embeddings, dim=300):
         return question_embedding
 
 
-# calculating the tfidf of the all the title
-vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=preprocessed_data.shape[0])
-vectorizer.fit_transform(preprocessed_data['processed_title'].values)
-
-
 def search_results(search_string, num_results):
     # preprocessing the input search string
     search_string = preprocess_text(search_string)
@@ -116,25 +145,24 @@ def search_results(search_string, num_results):
     # Getting the predicted tags
     tags = list(predict_tags(search_string))
     tags = [item for t in tags for item in t]
+    preprocessed_data = get_category_df(tags, 3)
     tags = set(tags)
 
     if len(tags) != 0:
         search_res = []
-        mask = preprocessed_data['tags'].str.contains('|'.join(tags))
-        data_new = preprocessed_data[mask]
-        data_new.reset_index(inplace=True, drop=True)
         all_title_embeddings = []
 
         # calculating the tfidf
-        masked_vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=data_new.shape[0])
-        masked_vectorizer.fit_transform(data_new['processed_title'].values)
+        masked_vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=preprocessed_data.shape[0])
+        masked_vectorizer.fit_transform(preprocessed_data['question_content'].values)
 
         # calculating the tfidf of the input string
         input_query = [search_string]
         search_string_tfidf = masked_vectorizer.transform(input_query)
 
         # getting the title embedding from word to vec model
-        for title in data_new.processed_title:
+        for title in preprocessed_data.question_content:
+            title = preprocess_text(title)
             all_title_embeddings.append(question_to_vec(title, w2v_model))
         all_title_embeddings = np.array(all_title_embeddings)
 
@@ -143,34 +171,9 @@ def search_results(search_string, num_results):
 
         # adding additional scores like overall score, sentiment, search string tfidf to the cosine similarity
         cosine_similarities = cosine_similarities.add(
-            (0.4 * data_new.overall_scores) + (0.1 * data_new.sentiment_polarity) + (0.1 * masked_vectorizer.idf_),
+            (0.4 * preprocessed_data.overall_scores) + (0.1 * preprocessed_data.sentiment_polarity) + (0.1 * masked_vectorizer.idf_),
             fill_value=0)
 
-        for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
-            output = data_new.iloc[i].question_content
-            temp = {
-                'title': str(data_new.original_title[i]),
-                'url': str(data_new.question_url[i]),
-                'similarity_score': str(j)[:5],
-                'votes': str(data_new.overall_scores[i]),
-                'body': str(output),
-                'tags': str(data_new.tags[i])
-            }
-            search_res.append(temp)
-        return search_res
-
-    else:
-        input_query = [search_string]
-        all_title_embeddings = title_embeddings
-
-        # calculating the tfidf of the input search query
-        search_string_tfidf = vectorizer.transform(input_query)
-        cosine_similarities = pd.Series(cosine_similarity(search_vect, all_title_embeddings)[0])
-        cosine_similarities = cosine_similarities.add(
-            (0.4 * preprocessed_data.overall_scores) + (0.1 * preprocessed_data.sentiment_polarity) +
-            (0.2 * vectorizer.idf_), fill_value=0)
-
-        search_res = []
         for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
             output = preprocessed_data.iloc[i].question_content
             temp = {
@@ -179,7 +182,7 @@ def search_results(search_string, num_results):
                 'similarity_score': str(j)[:5],
                 'votes': str(preprocessed_data.overall_scores[i]),
                 'body': str(output),
-                'tags': tags
+                'tags': str(preprocessed_data.tags[i])
             }
             search_res.append(temp)
         return search_res
