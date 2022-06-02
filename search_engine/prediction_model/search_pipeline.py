@@ -23,6 +23,7 @@ env.read_env()
 FINAL_DATA = env.str("FINAL_DATA")
 MODELS = env.str("MODELS")
 DATA_PATH = env.str("DATA_PATH")
+CATEGORIES_DIRECTORY = DATA_PATH + 'dbc/'
 MAX_SEQUENCE_LENGTH = 300
 TRAIN_TEST_PATH = env.str("TRAIN_TEST_PATH")
 nltk.download('stopwords')
@@ -37,14 +38,12 @@ w2v_model = gensim.models.word2vec.Word2Vec.load(MODELS + 'SO_word2vec_embedding
 model_tags = pickle.load(open(MODELS + 'model_tags.pkl', 'rb'))
 mlb = pickle.load(open(MODELS + 'mlb.pkl', 'rb'))
 
-directory = 'C:/Users/38097/Desktop/so_search/data/dbc/'
 dict_of_dfs = {}
 
-for filename in os.listdir(directory):
-    f = os.path.join(directory, filename)
-    if os.path.isfile(f):
-        df = pd.read_csv(f, engine='pyarrow')
-        dict_of_dfs[filename[:-4]] = df
+for file in os.scandir(CATEGORIES_DIRECTORY):
+    if file.is_file():
+        df = pd.read_csv(file.path, engine='pyarrow')
+        dict_of_dfs[file.name[:-4]] = df
 
 
 def encode_tags(list_of_tags: list, keys: pd.DataFrame):
