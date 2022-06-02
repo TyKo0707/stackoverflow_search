@@ -193,6 +193,8 @@ def search_results(search_string, num_results):
             'tags': str(preprocessed_data.tags[i])
         }
         search_res.append(temp)
+        if float(search_res[0]['similarity_score']) < 0.8:
+            return
     return search_res
 
 
