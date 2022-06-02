@@ -93,13 +93,14 @@ def load_tag_encoder():
     return tag_encode
 
 
-def predict_tags(text):
+def predict_tags(text, num_of_tags):
     # Tokenize text
     x_test = pad_sequences(tokenizer.texts_to_sequences([text]), maxlen=MAX_SEQUENCE_LENGTH)
     # Predict
     prediction = model.predict([x_test])[0]
+    pr_sort = np.sort(prediction)
     for i, value in enumerate(prediction):
-        if value > 0.5:
+        if value in pr_sort[-num_of_tags:]:
             prediction[i] = 1
         else:
             prediction[i] = 0
@@ -136,55 +137,63 @@ def question_to_vec(question, embeddings, dim=300):
         return question_embedding
 
 
+def most_common(string, tags):
+    tag_list = string.split('|')
+    count = 0
+    for i in tag_list:
+        if i in tags:
+            count += 1
+    return count
+
+
 def search_results(search_string, num_results):
     # preprocessing the input search string
     search_string = preprocess_text(search_string)
     search_vect = np.array([question_to_vec(search_string, w2v_model)])
 
     # Getting the predicted tags
-    tags = list(predict_tags(search_string))
+    tags = list(predict_tags(search_string, 5))
     tags = [item for t in tags for item in t]
     preprocessed_data = get_category_df(tags, 3)
     tags = set(tags)
 
-    if len(tags) != 0:
-        search_res = []
-        all_title_embeddings = []
+    search_res = []
+    all_title_embeddings = []
 
-        # calculating the tfidf
-        masked_vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=preprocessed_data.shape[0])
-        masked_vectorizer.fit_transform(preprocessed_data['question_content'].values)
+    preprocessed_data['common_tags_num'] = preprocessed_data['tags'].apply(lambda x: most_common(x, tags))
+    preprocessed_data.sort_values(by=['common_tags_num'], inplace=True)
+    preprocessed_data = preprocessed_data[-500:]
+    preprocessed_data.reset_index(inplace=True, drop=True)
 
-        # calculating the tfidf of the input string
-        input_query = [search_string]
-        search_string_tfidf = masked_vectorizer.transform(input_query)
+    # calculating the tfidf
+    masked_vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=preprocessed_data.shape[0])
+    masked_vectorizer.fit_transform(preprocessed_data['post_corpus'].values)
 
-        # getting the title embedding from word to vec model
-        for title in preprocessed_data.question_content:
-            title = preprocess_text(title)
-            all_title_embeddings.append(question_to_vec(title, w2v_model))
-        all_title_embeddings = np.array(all_title_embeddings)
+    # calculating the tfidf of the input string
+    input_query = [search_string]
+    search_string_tfidf = masked_vectorizer.transform(input_query)
 
-        # calculating the cosine similarity
-        cosine_similarities = pd.Series(cosine_similarity(search_vect, all_title_embeddings)[0])
+    # getting the title embedding from word to vec model
+    for title in preprocessed_data.post_corpus:
+        title = preprocess_text(title)
+        all_title_embeddings.append(question_to_vec(title, w2v_model))
+    all_title_embeddings = np.array(all_title_embeddings)
 
-        # adding additional scores like overall score, sentiment, search string tfidf to the cosine similarity
-        cosine_similarities = cosine_similarities.add(
-            (0.4 * preprocessed_data.overall_scores) + (0.1 * preprocessed_data.sentiment_polarity) + (0.1 * masked_vectorizer.idf_),
-            fill_value=0)
+    # calculating the cosine similarity
+    cosine_similarities = pd.Series(cosine_similarity(search_vect, all_title_embeddings)[0])
 
-        for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
-            output = preprocessed_data.iloc[i].question_content
-            temp = {
-                'title': str(preprocessed_data.original_title[i]),
-                'url': str(preprocessed_data.question_url[i]),
-                'similarity_score': str(j)[:5],
-                'votes': str(preprocessed_data.overall_scores[i]),
-                'body': str(output),
-                'tags': str(preprocessed_data.tags[i])
-            }
-            search_res.append(temp)
-        return search_res
+    for i, j in cosine_similarities.nlargest(int(num_results)).iteritems():
+        output = preprocessed_data.iloc[i].post_corpus
+        temp = {
+            'title': str(preprocessed_data.original_title[i]),
+            'url': str(preprocessed_data.question_url[i]),
+            'similarity_score': str(j)[:5],
+            'votes': str(preprocessed_data.overall_scores[i]),
+            'body': str(output),
+            'tags': str(preprocessed_data.tags[i])
+        }
+        search_res.append(temp)
+    return search_res
 
 
 if __name__ == '__main__':

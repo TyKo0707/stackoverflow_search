@@ -34,7 +34,6 @@ async def input_limit(message: Message, state: FSMContext):
         await state.finish()
         current_state = await state.get_state()
         search_text = user_data['search_text']
-        print(f'search_text: {search_text}, username: {message.from_user.username}, state: {current_state}')
         articles = search_results(search_text, num)
         if len(articles) == 0:
             await message.reply(f"No articles were found on request:\n{search_text}")
