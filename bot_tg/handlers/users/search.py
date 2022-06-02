@@ -46,7 +46,7 @@ async def input_limit(message: Message, state: FSMContext):
                 fmt.text(f'{fmt.hbold("Body:")} {articles[i]["body"][:75]}...\n—————————\n'),
                 sep='\n'
             )
-        result += fmt.text(f"The search has been done for {fmt.hbold(round(time.time() - t_0, 1))} seconds\n\n")
+            result += fmt.text(f"The search has been done for {fmt.hbold(round(time.time() - t_0, 1))} seconds\n\n")
         await message.reply(result, disable_web_page_preview=True)
     else:
         await message.reply(fmt.text(f"{fmt.hbold('Incorrect input')}. "
