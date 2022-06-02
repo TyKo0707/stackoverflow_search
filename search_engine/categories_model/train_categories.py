@@ -43,5 +43,5 @@ y_pred = logreg_tags.predict(X_test_tags)
 pickle.dump(logreg_tags, open(MODELS + 'model_tags.pkl', 'wb'))
 print('accuracy %s' % accuracy_score(y_pred, y_test_tags))
 
-print(classification_report(y_test_tags, y_pred, target_names=logreg_tags.classes_))
+print(classification_report(y_test_tags, y_pred))
 # endregion
