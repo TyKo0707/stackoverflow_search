@@ -163,6 +163,7 @@ def search_results(search_string, num_results):
     preprocessed_data['common_tags_num'] = preprocessed_data['tags'].apply(lambda x: most_common(x, tags))
     preprocessed_data.sort_values(by=['common_tags_num'], inplace=True)
     preprocessed_data = preprocessed_data[-500:]
+    preprocessed_data.drop_duplicates(inplace=True)
     preprocessed_data.reset_index(inplace=True, drop=True)
 
     # calculating the tfidf
