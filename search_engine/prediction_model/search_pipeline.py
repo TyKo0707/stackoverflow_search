@@ -188,7 +188,6 @@ def search_results(search_string, num_results):
             'title': str(preprocessed_data.original_title[i]),
             'url': str(preprocessed_data.question_url[i]),
             'similarity_score': str(j)[:5],
-            'votes': str(preprocessed_data.overall_scores[i]),
             'body': str(output),
             'tags': str(preprocessed_data.tags[i])
         }

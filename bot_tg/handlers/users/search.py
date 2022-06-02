@@ -7,6 +7,7 @@ from bot_tg.data.config import MAX_LIMIT
 from aiogram.utils.markdown import hlink
 import aiogram.utils.markdown as fmt
 from aiogram.dispatcher.filters import Text
+import time
 
 
 @dp.message_handler(Text(equals='Search🔎'), chat_type=ChatType.PRIVATE)
@@ -32,27 +33,21 @@ async def input_limit(message: Message, state: FSMContext):
         num = int(text)
         user_data = await state.get_data()
         await state.finish()
-        current_state = await state.get_state()
         search_text = user_data['search_text']
+        t_0 = time.time()
         articles = search_results(search_text, num)
-        if len(articles) == 0:
-            await message.reply(f"No articles were found on request:\n{search_text}")
-        else:
-            result = ''
-            if len(articles) < num:
-                num = len(articles)
-                result += fmt.text(f"Only {fmt.hbold(str(num))} articles were found.\n")
-            result += "Articles:\n—————————\n"
-            for i in range(num):
-                result += fmt.text(
-                    fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
-                    fmt.text(f'{fmt.hbold("Similarity score:")} {articles[i]["similarity_score"]}'),
-                    fmt.text(f'{fmt.hbold("Tags:")} {articles[i]["tags"]}'),
-                    fmt.text(f'{fmt.hbold("Body:")} {articles[i]["body"][:75]}...\n—————————\n'),
-                    sep='\n'
-                )
-            await message.reply(result, disable_web_page_preview=True)
-        # await States.start.set()
+        result = ''
+        result += "Articles:\n—————————\n"
+        for i in range(num):
+            result += fmt.text(
+                fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
+                fmt.text(f'{fmt.hbold("Similarity score:")} {articles[i]["similarity_score"]}'),
+                fmt.text(f'{fmt.hbold("Tags:")} {articles[i]["tags"]}'),
+                fmt.text(f'{fmt.hbold("Body:")} {articles[i]["body"][:75]}...\n—————————\n'),
+                sep='\n'
+            )
+            result += fmt.text(f"The search has been done for {fmt.hbold(round(time.time() - t_0, 1))} seconds\n\n")
+        await message.reply(result, disable_web_page_preview=True)
     else:
         await message.reply(fmt.text(f"{fmt.hbold('Incorrect input')}. "
                                      f"Only non-negative integers are allowed which are \u2264 {MAX_LIMIT}."
