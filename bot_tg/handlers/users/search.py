@@ -8,6 +8,7 @@ from aiogram.utils.markdown import hlink
 import aiogram.utils.markdown as fmt
 from aiogram.dispatcher.filters import Text
 import time
+from aiogram.utils.exceptions import BadRequest
 
 
 @dp.message_handler(Text(equals='Search🔎'), chat_type=ChatType.PRIVATE)
@@ -37,22 +38,23 @@ async def input_limit(message: Message, state: FSMContext):
         t_0 = time.time()
         articles = search_results(search_text, num)
         if articles:
-            result = ''
-            result += "Articles:\n—————————\n"
+            text = "Articles:\n—————————\n"
             for i in range(num):
-                result += fmt.text(
+                text += fmt.text(
                     fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
                     fmt.text(f'{fmt.hbold("Similarity score:")} {articles[i]["similarity_score"]}'),
                     fmt.text(f'{fmt.hbold("Tags:")} {articles[i]["tags"]}'),
                     fmt.text(f'{fmt.hbold("Body:")} {articles[i]["body"][:75]}...\n—————————\n'),
                     sep='\n'
                 )
-            result += fmt.text(f"The search has been done for {fmt.hbold(round(time.time() - t_0, 1))} seconds\n\n")
-            await message.reply(result, disable_web_page_preview=True)
+            text += fmt.text(f"The search has been done for {fmt.hbold(round(time.time() - t_0, 1))} seconds\n\n")
         else:
-            await message.reply(
-                fmt.text(f'No corresponding articles were found for such request: "{fmt.hbold(search_text)}"'))
+            text = fmt.text(f'No corresponding articles were found for such request: "{fmt.hbold(search_text)}"')
     else:
-        await message.reply(fmt.text(f"{fmt.hbold('Incorrect input')}. "
-                                     f"Only non-negative integers are allowed which are \u2264 {MAX_LIMIT}."
-                                     f"\nTry again:"))
+        text = fmt.text(f"{fmt.hbold('Incorrect input')}. "
+                        f"Only non-negative integers are allowed which are \u2264 {MAX_LIMIT}."
+                        f"\nTry again:")
+    try:
+        await message.reply(text, disable_web_page_preview=True)
+    except BadRequest:
+        await message.answer(text, disable_web_page_preview=True)
