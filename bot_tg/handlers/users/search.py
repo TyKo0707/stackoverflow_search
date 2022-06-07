@@ -9,7 +9,6 @@ from aiogram.utils.markdown import hlink
 import aiogram.utils.markdown as fmt
 from aiogram.dispatcher.filters import Text
 import time
-from aiogram.utils.exceptions import BadRequest
 
 
 @dp.message_handler(Text(equals='Search🔎'), chat_type=ChatType.PRIVATE)
