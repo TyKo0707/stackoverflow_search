@@ -1,5 +1,6 @@
 from aiogram.dispatcher import FSMContext
 from bot_tg.loader import dp
+from .handle_replies import reply_to_message
 from search_engine.prediction_model.search_pipeline import search_results
 from bot_tg.states.state_storage import States
 from aiogram.types import Message, ChatType
@@ -54,7 +55,5 @@ async def input_limit(message: Message, state: FSMContext):
         text = fmt.text(f"{fmt.hbold('Incorrect input')}. "
                         f"Only non-negative integers are allowed which are \u2264 {MAX_LIMIT}."
                         f"\nTry again:")
-    try:
-        await message.reply(text, disable_web_page_preview=True)
-    except BadRequest:
-        await message.answer(text, disable_web_page_preview=True)
+    await reply_to_message(message, text)
+
