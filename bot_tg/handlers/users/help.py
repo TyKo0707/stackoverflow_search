@@ -1,4 +1,5 @@
 from aiogram.types import Message, ChatType
+from .handle_replies import reply_to_message
 from bot_tg.loader import dp
 from aiogram.dispatcher.filters import Text
 import aiogram.utils.markdown as fmt
@@ -15,4 +16,4 @@ async def bot_help(message: Message):
         fmt.text(f"/search - Search🔎"),
         sep='\n'
     )
-    await message.reply(text)
+    await reply_to_message(message, text)

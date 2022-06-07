@@ -1,5 +1,4 @@
-from aiogram.dispatcher import FSMContext
-from bot_tg.states.state_storage import States
+from .handle_replies import reply_to_message
 from bot_tg.loader import dp
 from aiogram.types import Message, ChatType
 from logger import get_logger
@@ -16,6 +15,7 @@ async def start(message: Message):
                     f"corresponding articles."
                     f"\nUse /search command or click the button (not for groups) to start searching for the articles")
     if message.chat.type in [ChatType.SUPERGROUP, ChatType.GROUP]:
-        await message.reply(text)
+        await reply_to_message(message, text)
     else:
-        await message.reply(text, reply_markup=main_keyboard)
+        await reply_to_message(message, text, main_keyboard)
+
