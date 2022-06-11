@@ -38,21 +38,20 @@ async def input_limit(message: Message, state: FSMContext):
         t_0 = time.time()
         articles = search_results(search_text, num)
         if articles:
-            text = "Articles:\n—————————\n"
+            reply_text = "Articles:\n—————————\n"
             for i in range(num):
-                text += fmt.text(
+                reply_text += fmt.text(
                     fmt.text(f'{fmt.hbold("Title:")} {hlink(articles[i]["title"].capitalize(), articles[i]["url"])}'),
                     fmt.text(f'{fmt.hbold("Similarity score:")} {articles[i]["similarity_score"]}'),
                     fmt.text(f'{fmt.hbold("Tags:")} {articles[i]["tags"]}'),
                     fmt.text(f'{fmt.hbold("Body:")} {articles[i]["body"][:75]}...\n—————————\n'),
                     sep='\n'
                 )
-            text += fmt.text(f"The search has been done for {fmt.hbold(round(time.time() - t_0, 1))} seconds\n\n")
+            reply_text += fmt.text(f"The search has been done for {fmt.hbold(round(time.time() - t_0, 1))} seconds\n\n")
         else:
-            text = fmt.text(f'No corresponding articles were found for such request: "{fmt.hbold(search_text)}"')
+            reply_text = fmt.text(f'No corresponding articles were found for such request: "{fmt.hbold(search_text)}"')
     else:
-        text = fmt.text(f"{fmt.hbold('Incorrect input')}. "
-                        f"Only non-negative integers are allowed which are \u2264 {MAX_LIMIT}."
-                        f"\nTry again:")
-    await reply_to_message(message, text)
-
+        reply_text = fmt.text(f"{fmt.hbold('Incorrect input')}. "
+                              f"Only non-negative integers are allowed which are \u2264 {MAX_LIMIT}."
+                              f"\nTry again:")
+    await reply_to_message(message, reply_text)
