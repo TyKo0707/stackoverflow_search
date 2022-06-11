@@ -62,11 +62,11 @@ def save_dataset(key_cat, dataframe, header=False, mode='a'):
 
 if __name__ == '__main__':
     for i in range((len(main_data) // 10000) + 1):
-        df = main_data[i * 10000: (i + 1) * 10000]
-        df_dict = get_df(df)
-        for key, df in df_dict.items():
+        df_sample = main_data[i * 10000: (i + 1) * 10000]
+        df_dict = get_df(df_sample)
+        for key, df_sample in df_dict.items():
             if i == 0:
-                save_dataset(key, df, True, 'w')
+                save_dataset(key, df_sample, True, 'w')
             else:
-                save_dataset(key, df, False, 'a')
+                save_dataset(key, df_sample, False, 'a')
         print(f'From {i * 10000} to {(i + 1) * 10000} was processed!')

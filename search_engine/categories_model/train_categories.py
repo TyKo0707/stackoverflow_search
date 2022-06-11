@@ -24,16 +24,16 @@ def split_tags(string):
         return [int(i) for i in string.split('|')]
 
 
-df_tags = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow').sample(frac=1)
-df_tags.tags = df_tags.tags.apply(split_tags)
-df_tags.dropna(inplace=True, axis=0)
-tags = df_tags.tags
+encoded_df = pd.read_csv(DATA_PATH + 'enc_dataset.csv', engine='pyarrow').sample(frac=1)
+encoded_df.tags = encoded_df.tags.apply(split_tags)
+encoded_df.dropna(inplace=True, axis=0)
+tags = encoded_df.tags
 
 multilabel_binarizer = MultiLabelBinarizer()
-y_bin = multilabel_binarizer.fit_transform(df_tags.tags)
+y_bin = multilabel_binarizer.fit_transform(encoded_df.tags)
 pickle.dump(multilabel_binarizer, open(MODELS + 'mlb.pkl', 'wb'))
 
-X_train_tags, X_test_tags, y_train_tags, y_test_tags = train_test_split(y_bin, df_tags['category'], test_size=0.2,
+X_train_tags, X_test_tags, y_train_tags, y_test_tags = train_test_split(y_bin, encoded_df['category'], test_size=0.2,
                                                                         random_state=0)
 
 # region tags model

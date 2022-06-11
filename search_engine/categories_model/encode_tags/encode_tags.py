@@ -32,18 +32,18 @@ class Encoder:
 
     def encode_tags(self):
         df = self.df.copy(deep=True)
-        new_tags = []
-        keys = self.keys_from_tags()
+        new_enc_tags = []
+        tag_keys = self.keys_from_tags()
         for i in df.iterrows():
-            t = []
+            temp_ind = []
             for j in i[1].tags.split('|'):
                 try:
-                    code = keys.loc[keys['tag'] == j].code.values[0]
-                    t.append(code)
+                    code = tag_keys.loc[tag_keys['tag'] == j].code.values[0]
+                    temp_ind.append(code)
                 except:
                     continue
-            new_tags.append(t)
-        df.tags = ['|'.join([str(j) for j in i]) for i in new_tags]
+            new_enc_tags.append(temp_ind)
+        df.tags = ['|'.join([str(j) for j in i]) for i in new_enc_tags]
 
         return df
 
@@ -55,16 +55,16 @@ class Decoder:
 
     def decode_tags(self):
         df = self.df.copy(deep=True)
-        new_tags = []
+        new_dec_tags = []
         for i in df.iterrows():
-            t = []
+            temp_tags = []
             for j in i[1].tags.split('|'):
                 try:
                     tag = self.keys.loc[self.keys['code'] == int(j)].tag.values[0]
-                    t.append(tag)
+                    temp_tags.append(tag)
                 except:
                     continue
-            new_tags.append(t)
-        df.tags = ['|'.join([str(j) for j in i]) for i in new_tags]
+            new_dec_tags.append(temp_tags)
+        df.tags = ['|'.join([str(j) for j in i]) for i in new_dec_tags]
 
         return df
