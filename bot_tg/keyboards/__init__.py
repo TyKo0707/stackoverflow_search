@@ -1,1 +1,1 @@
-from .default import main_keyboard
+from .default.search_keyboard import main_keyboard

@@ -196,8 +196,3 @@ def search_results(search_string, num_results):
         if float(search_res[0]['similarity_score']) < 0.8:
             return
     return search_res
-
-
-if __name__ == '__main__':
-    print(search_results('error_log per virtual host one linux server running apache php 5 multiple virtual hosts '
-                         'separate log files seem separate php virtual hosts set apache php log easiest way would', 2))

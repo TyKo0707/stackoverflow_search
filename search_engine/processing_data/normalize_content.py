@@ -65,6 +65,3 @@ def normalize_content(dataframe):
 
 df1 = pd.read_parquet(f'{DATA_PATH}/de_duplicated_data1.gzip', engine="pyarrow")
 save_parts(df1, 1)
-
-# df2 = pd.read_parquet(f'{RAW_DATA_PATH}/de_duplicated_data2.gzip', engine="pyarrow")
-# save_parts(df2, 2)
